@@ -27,6 +27,7 @@
   }
 
   function showOverlayBanner(text) {
+    console.log('[SCENE]:', text);
     let banner = document.getElementById('demo-step-banner');
     if (!banner) {
       banner = document.createElement('div');
@@ -207,5 +208,6 @@
 
   const banner = document.getElementById('demo-step-banner');
   if (banner) banner.remove();
+  window.__DEMO_FINISHED__ = true;
   console.log('✅ Demo walkthrough completed in ~3 minutes!');
 })();
