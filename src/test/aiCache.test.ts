@@ -32,6 +32,12 @@ describe('aiCache', () => {
     expect(hashPayload(payloadA)).toBe(hashPayload(payloadB));
   });
 
+  it('generates distinct hashes for different cities', () => {
+    const hashDelhi = hashPayload({ city: 'Delhi', tier: 'severe' });
+    const hashLahore = hashPayload({ city: 'Lahore', tier: 'severe' });
+    expect(hashDelhi).not.toBe(hashLahore);
+  });
+
   it('stores and retrieves cached results by hash key', () => {
     const key = hashPayload({ test: 123 });
     expect(getCachedGuidance(key)).toBeNull();
@@ -41,12 +47,34 @@ describe('aiCache', () => {
     expect(retrieved).toEqual(mockResult);
   });
 
-  it('evicts oldest entries when capacity exceeds maximum limit', () => {
+  it('evicts oldest entries when capacity exceeds maximum limit (LRU behavior)', () => {
     for (let i = 0; i < 105; i++) {
       setCachedGuidance(`key-${i}`, { ...mockResult, summary: `Entry ${i}` });
     }
-    // Oldest entries (e.g. key-0 to key-4) should be pruned
     expect(getCachedGuidance('key-0')).toBeNull();
+    expect(getCachedGuidance('key-4')).toBeNull();
     expect(getCachedGuidance('key-104')).toBeDefined();
+  });
+
+  it('clears all cached entries when clearGuidanceCache is invoked', () => {
+    setCachedGuidance('k1', mockResult);
+    setCachedGuidance('k2', mockResult);
+    clearGuidanceCache();
+    expect(getCachedGuidance('k1')).toBeNull();
+    expect(getCachedGuidance('k2')).toBeNull();
+  });
+
+  it('handles empty payload hashing predictably', () => {
+    const hash1 = hashPayload({});
+    const hash2 = hashPayload({});
+    expect(hash1).toBe(hash2);
+    expect(typeof hash1).toBe('string');
+    expect(hash1.length).toBeGreaterThan(0);
+  });
+
+  it('generates distinct hashes when user context changes single enum property', () => {
+    const ctxCar = hashPayload({ commute: 'car', fuel: 'lpg' });
+    const ctxTransit = hashPayload({ commute: 'public-transit', fuel: 'lpg' });
+    expect(ctxCar).not.toBe(ctxTransit);
   });
 });

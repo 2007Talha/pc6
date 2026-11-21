@@ -86,36 +86,40 @@ export async function geocodeCity(city: string): Promise<GeocodingResult | null>
 export async function fetchLiveAqi(
   city: string,
 ): Promise<LiveAirQualityData | null> {
-  const geo = await geocodeCity(city);
-  if (!geo) return null;
+  try {
+    const geo = await geocodeCity(city);
+    if (!geo) return null;
 
-  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${geo.latitude}&longitude=${geo.longitude}&current=pm10,pm2_5,us_aqi`;
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${geo.latitude}&longitude=${geo.longitude}&current=pm10,pm2_5,us_aqi`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Air quality lookup failed: ${res.status}`);
+    const res = await fetch(url);
+    if (!res.ok) return null;
 
-  const data: OpenMeteoAqiResponse = await res.json();
-  const current = data.current;
-  if (!current) throw new Error('No current air quality data returned');
+    const data: OpenMeteoAqiResponse = await res.json();
+    const current = data.current;
+    if (!current) return null;
 
-  const pm25 = Math.round(current.pm2_5 ?? 0);
-  const pm10 = Math.round(current.pm10 ?? 0);
-  const usAqi = Math.round(current.us_aqi ?? 0);
-  const aqiTier = mapUsAqiToTier(usAqi);
-  const aqiCategory = getUsAqiCategory(usAqi);
-  const indianNaqiCategory = getIndianNaqiCategory(pm25);
+    const pm25 = Math.round(current.pm2_5 ?? 0);
+    const pm10 = Math.round(current.pm10 ?? 0);
+    const usAqi = Math.round(current.us_aqi ?? 0);
+    const aqiTier = mapUsAqiToTier(usAqi);
+    const aqiCategory = getUsAqiCategory(usAqi);
+    const indianNaqiCategory = getIndianNaqiCategory(pm25);
 
-  return {
-    city: geo.name,
-    country: geo.country,
-    latitude: geo.latitude,
-    longitude: geo.longitude,
-    pm25,
-    pm10,
-    usAqi,
-    aqiTier,
-    aqiCategory,
-    indianNaqiCategory,
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  };
+    return {
+      city: geo.name,
+      country: geo.country,
+      latitude: geo.latitude,
+      longitude: geo.longitude,
+      pm25,
+      pm10,
+      usAqi,
+      aqiTier,
+      aqiCategory,
+      indianNaqiCategory,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+  } catch {
+    return null;
+  }
 }

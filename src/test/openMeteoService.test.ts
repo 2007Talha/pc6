@@ -20,10 +20,10 @@ describe('openMeteoService', () => {
 
     it('maps AQI values to appropriate tiers adhering to EPA warning thresholds', () => {
       expect(mapUsAqiToTier(50)).toBe('moderate');
-      expect(mapUsAqiToTier(140)).toBe('moderate'); // 101-150: USG
-      expect(mapUsAqiToTier(180)).toBe('poor');     // 151-300: Unhealthy
-      expect(mapUsAqiToTier(320)).toBe('very-poor'); // 301-400: Very Unhealthy
-      expect(mapUsAqiToTier(450)).toBe('severe');   // 400+: Hazardous
+      expect(mapUsAqiToTier(140)).toBe('moderate');
+      expect(mapUsAqiToTier(180)).toBe('poor');
+      expect(mapUsAqiToTier(320)).toBe('very-poor');
+      expect(mapUsAqiToTier(450)).toBe('severe');
     });
 
     it('correctly classifies Indian NAQI categories based on PM2.5', () => {
@@ -53,6 +53,16 @@ describe('openMeteoService', () => {
       const res = await geocodeCity('Delhi');
       expect(res).toEqual({ name: 'Delhi', latitude: 28.61, longitude: 77.23, country: 'India' });
     });
+
+    it('returns null when geocoding results array is empty or undefined', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ results: [] }),
+      } as unknown as Response);
+
+      const res = await geocodeCity('NonExistentCityXYZ123');
+      expect(res).toBeNull();
+    });
   });
 
   describe('fetchLiveAqi', () => {
@@ -80,6 +90,12 @@ describe('openMeteoService', () => {
       expect(data?.aqiCategory).toBe('Unhealthy');
       expect(data?.indianNaqiCategory).toBe('Satisfactory');
       expect(data?.aqiTier).toBe('poor');
+    });
+
+    it('handles network failures gracefully without unhandled rejections', async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network timeout'));
+      const data = await fetchLiveAqi('Lahore');
+      expect(data).toBeNull();
     });
   });
 });

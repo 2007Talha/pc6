@@ -32,4 +32,20 @@ describe('exportFormatters utility suite', () => {
     expect(isGuidanceResult({})).toBe(false);
     expect(isGuidanceResult({ dailyRoutine: [] })).toBe(false);
   });
+
+  it('rejects guidance missing impact metrics object', () => {
+    const invalid = { ...sampleGuidance, impactMetrics: null };
+    expect(isGuidanceResult(invalid)).toBe(false);
+  });
+
+  it('rejects guidance missing summary text', () => {
+    const invalid = { ...sampleGuidance, summary: 12345 };
+    expect(isGuidanceResult(invalid)).toBe(false);
+  });
+
+  it('preserves Unicode characters like µg/m³ and CO₂e in formatted Markdown', () => {
+    const md = formatResultsAsMarkdown(sampleGuidance);
+    expect(md).toContain('CO₂e');
+    expect(md).not.toContain('$CO_2e$');
+  });
 });
