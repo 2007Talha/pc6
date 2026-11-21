@@ -48,7 +48,6 @@ Provide 6-8 daily routine blocks, 4-6 IAQ hacks, 4-5 sustainable alternatives, a
 
 /** Safely parse Gemini's JSON response */
 export function parseGeminiResponse(raw: string): GuidanceResult {
-  // Extract JSON from markdown code fences if present
   let jsonStr = raw.trim();
   const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenceMatch?.[1]) {
@@ -69,7 +68,7 @@ export function parseGeminiResponse(raw: string): GuidanceResult {
   return parsed as GuidanceResult;
 }
 
-/** Generate guidance — Gemini-first with deterministic fallback */
+/** Generate guidance — Gemini-first with defensive timeout and deterministic fallback */
 export async function generateGuidance(ctx: UserContext): Promise<GenerationState> {
   if (!isApiKeyConfigured()) {
     const result = generateDeterministicGuidance(ctx);
@@ -77,16 +76,24 @@ export async function generateGuidance(ctx: UserContext): Promise<GenerationStat
   }
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    const prompt = buildPrompt(ctx);
-    const response = await model.generateContent(prompt);
-    const text = response.response.text();
-    const result = parseGeminiResponse(text);
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Gemini API call timed out')), 3500),
+    );
+
+    const apiCall = (async () => {
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const prompt = buildPrompt(ctx);
+      const response = await model.generateContent(prompt);
+      const text = response.response.text();
+      return parseGeminiResponse(text);
+    })();
+
+    const result = await Promise.race([apiCall, timeoutPromise]);
     return { status: 'success', result, error: null, source: 'gemini' };
   } catch (err) {
-    console.warn('Gemini API failed, falling back to deterministic engine:', err);
+    console.warn('Gemini API failed or timed out, falling back to deterministic engine:', err);
     const result = generateDeterministicGuidance(ctx);
     return { status: 'success', result, error: null, source: 'deterministic' };
   }

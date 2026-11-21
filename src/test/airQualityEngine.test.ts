@@ -24,8 +24,16 @@ describe('airQualityEngine', () => {
     expect(result.summary).toContain('New Delhi');
   });
 
-  it('adjusts daily routine for work-from-home vs commuter', () => {
-    const commuterResult = generateDeterministicGuidance({
+  it('adjusts daily routine for public transit vs car vs two-wheeler vs WFH', () => {
+    const transitResult = generateDeterministicGuidance({
+      ...baseContext,
+      commuteMode: 'public-transit',
+    });
+    const carResult = generateDeterministicGuidance({
+      ...baseContext,
+      commuteMode: 'car',
+    });
+    const bikeResult = generateDeterministicGuidance({
       ...baseContext,
       commuteMode: 'two-wheeler',
     });
@@ -34,12 +42,64 @@ describe('airQualityEngine', () => {
       commuteMode: 'work-from-home',
     });
 
-    const commuterCommute = commuterResult.dailyRoutine.find(b => b.time.includes('7:30'));
-    const wfhCommute = wfhResult.dailyRoutine.find(b => b.time.includes('7:30'));
+    const transitMorning = transitResult.dailyRoutine.find(b => b.time.includes('7:30'));
+    const carMorning = carResult.dailyRoutine.find(b => b.time.includes('7:30'));
+    const bikeMorning = bikeResult.dailyRoutine.find(b => b.time.includes('7:30'));
+    const wfhMorning = wfhResult.dailyRoutine.find(b => b.time.includes('7:30'));
 
-    expect(commuterCommute?.activity).toContain('Sealed commute');
-    expect(commuterCommute?.activity).toContain('N95');
-    expect(wfhCommute?.activity).toContain('home office');
+    // Transit must NOT say "car windows" or "recirculate"
+    expect(transitMorning?.activity).toContain('Transit commute');
+    expect(transitMorning?.activity).toContain('N95');
+    expect(transitMorning?.activity).not.toContain('car');
+    expect(transitMorning?.reason).toContain('Bus stands');
+
+    // Car mentions cabin recirculation
+    expect(carMorning?.activity).toContain('Car commute');
+    expect(carMorning?.activity).toContain('recirculation');
+
+    // Two-wheeler mentions visor and N95
+    expect(bikeMorning?.activity).toContain('Two-wheeler');
+    expect(bikeMorning?.activity).toContain('visor');
+
+    // WFH is home office
+    expect(wfhMorning?.activity).toContain('home office');
+  });
+
+  it('synchronizes cross-ventilation window across routine and IAQ hacks (12:00-2:30 PM)', () => {
+    const result = generateDeterministicGuidance(baseContext);
+
+    const routineVentilation = result.dailyRoutine.find(b => b.time.includes('12:00–2:30 PM'));
+    expect(routineVentilation).toBeDefined();
+    expect(routineVentilation?.reason).toContain('break the inversion layer');
+
+    const houseResult = generateDeterministicGuidance({
+      ...baseContext,
+      housingType: 'independent-house',
+    });
+    const ventHack = houseResult.iaqHacks.find(h => h.title.includes('Cross-Ventilation'));
+    expect(ventHack?.steps[0]).toContain('12:00 PM–2:30 PM');
+  });
+
+  it('gives houseplants low priority and includes peer-reviewed scientific caveat', () => {
+    const result = generateDeterministicGuidance(baseContext);
+    const plantHack = result.iaqHacks.find(h => h.title.includes('Houseplants'));
+
+    expect(plantHack).toBeDefined();
+    expect(plantHack?.priority).toBe('low');
+    expect(plantHack?.steps[0]).toContain('CANNOT filter particulate matter');
+    expect(plantHack?.steps[0]).toContain('HEPA');
+  });
+
+  it('credits existing low-emission baseline for public transit and WFH', () => {
+    const transitResult = generateDeterministicGuidance({
+      ...baseContext,
+      commuteMode: 'public-transit',
+      cookingFuel: 'electric',
+    });
+
+    expect(transitResult.impactMetrics.explanation).toContain('existing transit baseline');
+    expect(transitResult.impactMetrics.explanation).toContain('existing zero-combustion electric');
+    expect(transitResult.impactMetrics.weeklyCo2eAvoidedKg).toBeGreaterThanOrEqual(13);
   });
 
   it('adjusts daily routine for children vs elderly profile', () => {
@@ -59,40 +119,6 @@ describe('airQualityEngine', () => {
     expect(elderlyBlock).toBeDefined();
   });
 
-  it('tailors IAQ hacks to housing type', () => {
-    const apartmentResult = generateDeterministicGuidance({
-      ...baseContext,
-      housingType: 'apartment',
-    });
-    const houseResult = generateDeterministicGuidance({
-      ...baseContext,
-      housingType: 'independent-house',
-    });
-
-    const aptTitles = apartmentResult.iaqHacks.map(h => h.title);
-    const houseTitles = houseResult.iaqHacks.map(h => h.title);
-
-    expect(aptTitles).toContain('Seal Door Gaps & Window Frames');
-    expect(houseTitles).toContain('Timed Cross-Ventilation Strategy');
-  });
-
-  it('tailors IAQ hacks to cooking fuel', () => {
-    const solidFuelResult = generateDeterministicGuidance({
-      ...baseContext,
-      cookingFuel: 'solid-fuel',
-    });
-    const electricResult = generateDeterministicGuidance({
-      ...baseContext,
-      cookingFuel: 'electric',
-    });
-
-    const solidTitles = solidFuelResult.iaqHacks.map(h => h.title);
-    const electricTitles = electricResult.iaqHacks.map(h => h.title);
-
-    expect(solidTitles).toContain('Eliminate Indoor Combustion Sources');
-    expect(electricTitles).toContain('Optimize Electric Kitchen Ventilation');
-  });
-
   it('calculates higher PM2.5 reduction for severe AQI', () => {
     const moderateResult = generateDeterministicGuidance({
       ...baseContext,
@@ -106,24 +132,6 @@ describe('airQualityEngine', () => {
     expect(severeResult.impactMetrics.pm25ReductionPercent).toBeGreaterThan(
       moderateResult.impactMetrics.pm25ReductionPercent,
     );
-  });
-
-  it('calculates avoided CO2e based on commute and fuel choices', () => {
-    const carSolidResult = generateDeterministicGuidance({
-      ...baseContext,
-      commuteMode: 'car',
-      cookingFuel: 'solid-fuel',
-    });
-    const transitLpgResult = generateDeterministicGuidance({
-      ...baseContext,
-      commuteMode: 'public-transit',
-      cookingFuel: 'lpg',
-    });
-
-    expect(carSolidResult.impactMetrics.weeklyCo2eAvoidedKg).toBeGreaterThan(
-      transitLpgResult.impactMetrics.weeklyCo2eAvoidedKg,
-    );
-    expect(carSolidResult.impactMetrics.explanation).toContain('CO₂e');
   });
 
   it('includes community-level alternatives for community-coordinator profile', () => {

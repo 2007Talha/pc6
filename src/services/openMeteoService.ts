@@ -9,6 +9,8 @@ export interface LiveAirQualityData {
   readonly pm10: number;
   readonly usAqi: number;
   readonly aqiTier: AqiTier;
+  readonly aqiCategory: string;
+  readonly indianNaqiCategory: string;
   readonly timestamp: string;
 }
 
@@ -32,12 +34,32 @@ interface OpenMeteoAqiResponse {
   };
 }
 
-/** Map US AQI reading to VayuShield AqiTier */
+/** Get official US EPA AQI category string */
+export function getUsAqiCategory(aqi: number): string {
+  if (aqi > 300) return 'Hazardous';
+  if (aqi > 200) return 'Very Unhealthy';
+  if (aqi > 150) return 'Unhealthy';
+  if (aqi > 100) return 'Unhealthy for Sensitive Groups';
+  if (aqi > 50) return 'Moderate';
+  return 'Good';
+}
+
+/** Get Indian NAQI category string based on PM2.5 in µg/m³ */
+export function getIndianNaqiCategory(pm25: number): string {
+  if (pm25 > 250) return 'Severe';
+  if (pm25 > 120) return 'Very Poor';
+  if (pm25 > 90) return 'Poor';
+  if (pm25 > 60) return 'Moderate';
+  if (pm25 > 30) return 'Satisfactory';
+  return 'Good';
+}
+
+/** Map US AQI reading to VayuShield AqiTier, aligning with EPA health warnings */
 export function mapUsAqiToTier(aqi: number): AqiTier {
   if (aqi > 400) return 'severe';
   if (aqi > 300) return 'very-poor';
-  if (aqi > 200) return 'poor';
-  return 'moderate';
+  if (aqi > 150) return 'poor'; // 151-300: Unhealthy (especially for elderly/respiratory sensitive)
+  return 'moderate'; // 0-150: Moderate / Sensitive Groups
 }
 
 /** Fetch geocoding coordinates for a city using Open-Meteo (Keyless & Free) */
@@ -80,6 +102,8 @@ export async function fetchLiveAqi(
   const pm10 = Math.round(current.pm10 ?? 0);
   const usAqi = Math.round(current.us_aqi ?? 0);
   const aqiTier = mapUsAqiToTier(usAqi);
+  const aqiCategory = getUsAqiCategory(usAqi);
+  const indianNaqiCategory = getIndianNaqiCategory(pm25);
 
   return {
     city: geo.name,
@@ -90,6 +114,8 @@ export async function fetchLiveAqi(
     pm10,
     usAqi,
     aqiTier,
+    aqiCategory,
+    indianNaqiCategory,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
 }
