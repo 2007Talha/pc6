@@ -65,10 +65,10 @@ describe('airQualityEngine', () => {
     expect(wfhMorning?.activity).toContain('home office');
   });
 
-  it('synchronizes cross-ventilation window across routine and IAQ hacks (12:00-2:30 PM)', () => {
+  it('synchronizes cross-ventilation window across routine and IAQ hacks (12:00 PM - 2:30 PM)', () => {
     const result = generateDeterministicGuidance(baseContext);
 
-    const routineVentilation = result.dailyRoutine.find(b => b.time.includes('12:00–2:30 PM'));
+    const routineVentilation = result.dailyRoutine.find(b => b.time.includes('12:00 PM - 2:30 PM'));
     expect(routineVentilation).toBeDefined();
     expect(routineVentilation?.reason).toContain('break the inversion layer');
 
@@ -77,7 +77,7 @@ describe('airQualityEngine', () => {
       housingType: 'independent-house',
     });
     const ventHack = houseResult.iaqHacks.find(h => h.title.includes('Cross-Ventilation'));
-    expect(ventHack?.steps[0]).toContain('12:00 PM–2:30 PM');
+    expect(ventHack?.steps[0]).toContain('12:00 PM - 2:30 PM');
   });
 
   it('gives houseplants low priority and includes peer-reviewed scientific caveat', () => {

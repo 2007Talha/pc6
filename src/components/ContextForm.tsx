@@ -301,7 +301,8 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           maxLength={CUSTOM_SCENARIO_MAX_LENGTH}
           rows={3}
           disabled={isLoading}
-          aria-describedby="scenario-counter scenario-error"
+          aria-invalid={!!errors.customScenario}
+          aria-describedby={errors.customScenario ? 'scenario-counter scenario-error' : 'scenario-counter'}
         />
         <span className="char-counter" id="scenario-counter">
           {formData.customScenario.length}/{CUSTOM_SCENARIO_MAX_LENGTH}

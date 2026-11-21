@@ -43,7 +43,36 @@ User Context:
 - Cooking Fuel: ${ctx.cookingFuel}
 ${ctx.customScenario ? `- Custom Scenario: ${sanitizeInput(ctx.customScenario)}` : ''}
 
-Provide 6-8 daily routine blocks, 4-6 IAQ hacks, 4-5 sustainable alternatives, and quantified impact metrics with transparent calculations. All advice must be specific to the user's context.`;
+Provide 6-8 daily routine blocks, 4-6 IAQ hacks, 4-5 sustainable alternatives, and quantified impact metrics with transparent calculations. Write in clean plain Unicode text (e.g. PM2.5, µg/m³, CO₂e, NO₂); do NOT use LaTeX math or dollar signs. All advice must be specific to the user's context.`;
+}
+
+/** Normalize LaTeX or dollar-sign math syntax to clean Unicode text */
+export function cleanLatexMath(str: string): string {
+  if (!str || typeof str !== 'string') return str;
+  return str
+    .replace(/\$PM_\{?2\.5\}?\$|PM_\{2\.5\}/g, 'PM2.5')
+    .replace(/\$(?:\\sim|\\approx)?\s*([0-9.]+)\s*~?\s*\\mu\s*g\/m\^\{?3\}?\$|\\mu\s*g\/m\^\{?3\}?/g, '$1 µg/m³')
+    .replace(/\$(?:\\sim|\\approx)?\s*([0-9.]+)\s*~?\s*kg~?CO_\{?2\}?e?(?:\/week)?\$|CO_\{?2\}?e/g, '$1 kg CO₂e/week')
+    .replace(/\$?\((?:NO_\{?2\}?)\)\$?|\$NO_\{?2\}?\$|NO_\{2\}/g, 'NO₂')
+    .replace(/\$NO_\{?x\}?\$|NO_\{x\}/g, 'NOx')
+    .replace(/\\sim|\\approx/g, '~')
+    .replace(/\\mu g/g, 'µg')
+    .replace(/\$([^$]+)\$/g, '$1')
+    .trim();
+}
+
+/** Recursively sanitize strings across parsed result */
+export function sanitizeGuidanceText(val: unknown): unknown {
+  if (typeof val === 'string') return cleanLatexMath(val);
+  if (Array.isArray(val)) return val.map(sanitizeGuidanceText);
+  if (val && typeof val === 'object') {
+    const res: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(val)) {
+      res[k] = sanitizeGuidanceText(v);
+    }
+    return res;
+  }
+  return val;
 }
 
 /** Safely parse Gemini's JSON response */
@@ -65,7 +94,7 @@ export function parseGeminiResponse(raw: string): GuidanceResult {
     throw new Error('Response missing required arrays');
   }
 
-  return parsed as GuidanceResult;
+  return sanitizeGuidanceText(parsed) as GuidanceResult;
 }
 
 /** Generate guidance — Gemini-first with defensive timeout and deterministic fallback */

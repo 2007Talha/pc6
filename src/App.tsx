@@ -41,7 +41,7 @@ export function App() {
       <footer className="app-footer">
         <p>
           VayuShield — Empowering families and communities to navigate winter smog safely.
-          Built with ♥ for cleaner air.
+          Built with care for cleaner air.
         </p>
       </footer>
     </>

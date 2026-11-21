@@ -20,7 +20,7 @@
 
 ### 🥇 High-Impact Criteria Alignment (Heavy Driver of Overall Score)
 - **Problem Statement Alignment:** Deeply personalized recommendations for **both families and communities** across 4 demographic profiles (*Families with Young Children*, *Elderly / Respiratory Sensitivity*, *Daily Commuters*, *Community / Neighborhood Coordinators*).
-- **Direct Impact Explanation:** Quantifies $PM_{2.5}$ reduction % ($\approx 15\%\text{--}65\%$), weekly avoided $CO_2e$ in kg (with baseline credits for green choices), demographic health gains, and collective community impact with a transparent mathematical formula.
+- **Direct Impact Explanation:** Quantifies PM2.5 reduction % (~15%–65%), weekly avoided CO₂e in kg (with baseline credits for green choices), demographic health gains, and collective community impact with a transparent mathematical formula.
 - **Deterministic Zero-Mock Verification:** Builds cleanly (`tsc -b && vite build`), zero runtime errors, runs 100% offline via deterministic engine when no API key is provided, zero dead buttons or placeholder data.
 
 ### 🥈 Medium-Impact Criteria Alignment (Under-The-Surface Excellence)
@@ -38,7 +38,7 @@
 
 ## 📌 Problem Statement & Context
 
-During northern winter months, geographic basins across South Asia (e.g., the Indo-Gangetic Plain covering Delhi, Lahore, Lucknow) suffer from severe atmospheric inversions. Cold, stagnant air traps particulate matter ($PM_{2.5}$, $PM_{10}$), nitrogen oxides ($NO_x$), and combustion byproducts at breathing level, frequently causing Air Quality Index (AQI) values to surge past 400+ ("Severe").
+During northern winter months, geographic basins across South Asia (e.g., the Indo-Gangetic Plain covering Delhi, Lahore, Lucknow) suffer from severe atmospheric inversions. Cold, stagnant air traps particulate matter (PM2.5, PM10), nitrogen oxides (NOx), and combustion byproducts at breathing level, frequently causing Air Quality Index (AQI) values to surge past 400+ ("Severe").
 
 Generic weather advisories such as *"stay indoors"* or *"avoid pollution"* fail because:
 1. **Livelihood Realities:** Daily commuters, two-wheeler riders, and students cannot simply cease daily routines.
@@ -54,7 +54,7 @@ VayuShield pairs **Gemini GenAI** with an authoritative, offline-first **Determi
 
 ### 1. Multi-Dimensional Context Inputs
 - **1-Click Test Presets:** Instant loading for common hackathon grading scenarios (*Delhi Smog Emergency*, *Elderly Respiratory Care*, and *RWA Community Action*).
-- **Live Open-Meteo Air Quality Auto-Lookup:** Users can enter any global city (e.g. *New Delhi*, *Lahore*, *London*) and click **`📡 Live AQI`** to fetch real-time $PM_{2.5}$, $PM_{10}$, and US AQI readings without needing any API key. The application automatically maps the live reading to the corresponding AQI severity tier.
+- **Live Open-Meteo Air Quality Auto-Lookup:** Users can enter any global city (e.g. *New Delhi*, *Lahore*, *London*) and click **`📡 Live AQI`** to fetch real-time PM2.5, PM10, and US AQI readings without needing any API key. The application automatically maps the live reading to the corresponding AQI severity tier.
 - **Location / City & AQI Tier:** Validated and sanitized against XSS and control characters. Supports Moderate (101–150 USG), Unhealthy/Poor (151–300), Very Unhealthy/Very Poor (301–400), and Severe/Hazardous (400+).
 - **Demographic & Role Profiles:**
   - *Family with Young Children:* Tailored school timings, UV-inversion windows, indoor physical play ideas.
@@ -71,8 +71,8 @@ VayuShield pairs **Gemini GenAI** with an authoritative, offline-first **Determi
 2. **🏠 Indoor Air Quality (IAQ) Hacks:** Concrete, numbered physical steps prioritized by urgency (HEPA filtration cycles, DIY MERV-13 box fans, wet-mopping vs. dry sweeping, kitchen exhaust management).
 3. **🌱 Sustainable Alternatives:** Direct micro-swaps for transit, home cooking, and heating, complete with trade-off benefits and carbon reduction.
 4. **📊 Quantified Direct Impact:** Transparent mathematical formulation detailing:
-   - Estimated $PM_{2.5}$ exposure reduction percentage ($\approx 15\%\text{--}65\%$)
-   - Weekly avoided $CO_2e$ in kg
+   - Estimated PM2.5 exposure reduction percentage (~15%–65%)
+   - Weekly avoided CO₂e in kg
    - Demographic health impact
    - Community-level network benefits
    - *Clear mathematical explanation breakdown*
@@ -183,10 +183,10 @@ npm run lint
 ## 📐 Assumptions & Scientific Foundation
 1. **Diurnal AQI Curve:** Assumes typical continental winter inversion patterns where surface temperatures remain cold until 10:30 AM, with maximum vertical mixing between 12:00 PM and 3:00 PM.
 2. **Exposure Reduction Estimates:** Modeled after WHO and CPCB particulate reduction studies:
-   - HEPA 13 filtration in sealed room: ~40–50% reduction in indoor $PM_{2.5}$.
+   - HEPA 13 filtration in sealed room: ~40–50% reduction in indoor PM2.5.
    - Sealing gaps in apartments: +5–10% prevention of outdoor ingress.
    - Transitioning from solid fuel to induction: avoids ~80% of personal indoor combustion dose.
-3. **Carbon Equivalency:** Derived from IPCC standard commuter travel emission factors (~120g $CO_2$/km for four-wheelers vs. ~40g for two-wheelers vs. ~15g for electric mass transit).
+3. **Carbon Equivalency:** Derived from IPCC standard commuter travel emission factors (~120g CO₂/km for four-wheelers vs. ~40g for two-wheelers vs. ~15g for electric mass transit).
 
 ---
 

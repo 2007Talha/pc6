@@ -27,7 +27,7 @@ function formatResultsAsText(r: GuidanceResult): string {
   }
   text += `\nImpact\n${'-'.repeat(20)}\n`;
   text += `PM2.5 Reduction: ~${r.impactMetrics.pm25ReductionPercent}%\n`;
-  text += `Weekly CO2e Avoided: ~${r.impactMetrics.weeklyCo2eAvoidedKg} kg\n`;
+  text += `Weekly CO₂e Avoided: ~${r.impactMetrics.weeklyCo2eAvoidedKg} kg\n`;
   text += `Health: ${r.impactMetrics.healthBenefit}\n`;
   text += `Community: ${r.impactMetrics.communityBenefit}\n`;
   return text;
@@ -52,7 +52,7 @@ function formatResultsAsMarkdown(r: GuidanceResult): string {
   }
   md += `\n## 📊 Quantified Impact\n\n`;
   md += `- **PM2.5 Reduction**: ~${r.impactMetrics.pm25ReductionPercent}%\n`;
-  md += `- **Weekly CO2e Avoided**: ~${r.impactMetrics.weeklyCo2eAvoidedKg} kg\n`;
+  md += `- **Weekly CO₂e Avoided**: ~${r.impactMetrics.weeklyCo2eAvoidedKg} kg\n`;
   md += `- **Health**: ${r.impactMetrics.healthBenefit}\n`;
   md += `- **Community**: ${r.impactMetrics.communityBenefit}\n\n`;
   md += `> ${r.impactMetrics.explanation}\n`;
