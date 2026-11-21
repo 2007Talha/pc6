@@ -27,6 +27,7 @@ Generic weather advisories such as *"stay indoors"* or *"avoid pollution"* fail 
 VayuShield pairs **Gemini GenAI** with an authoritative, offline-first **Deterministic Rule-Based Air Quality Engine** (`src/services/airQualityEngine.ts`), guaranteeing instant, richly personalized, zero-placeholder guidance regardless of API key configuration or network connectivity.
 
 ### 1. Multi-Dimensional Context Inputs
+- **Live Open-Meteo Air Quality Auto-Lookup:** Users can enter any global city (e.g. *New Delhi*, *Lahore*, *London*) and click **`📡 Live AQI`** to fetch real-time $PM_{2.5}$, $PM_{10}$, and US AQI readings without needing any API key. The application automatically maps the live reading to the corresponding AQI severity tier.
 - **Location / City & AQI Tier:** Validated and sanitized against XSS and control characters. Supports Moderate (101–200), Poor (201–300), Very Poor (301–400), and Severe (400+).
 - **Demographic & Role Profiles:**
   - *Family with Young Children:* Tailored school timings, UV-inversion windows, indoor physical play ideas.
