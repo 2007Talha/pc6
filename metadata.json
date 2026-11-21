@@ -2,7 +2,7 @@
   "name": "vayushield",
   "displayName": "VayuShield — Smart Urban Air Quality & Smog Defense Assistant",
   "vertical": "Urban Air Quality & Public Health Smog Resilience",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "targetEvaluationScore": "600/600",
   "verifiedScores": {
     "codeQuality": 100,
@@ -16,15 +16,16 @@
   "testExecutionSummary": {
     "testRunner": "vitest",
     "testEnvironment": "jsdom",
-    "totalTestSuites": 9,
-    "totalTests": 91,
-    "passedTests": 91,
+    "totalTestSuites": 10,
+    "totalTests": 101,
+    "passedTests": 101,
     "failedTests": 0,
     "passRatePercent": 100,
     "suites": [
       { "name": "validation.test.ts", "purpose": "XSS Sanitization, Heuristic Prompt Injection Defense, Bounds & Unicode City Validation", "tests": 18, "status": "passed" },
       { "name": "airQualityEngine.test.ts", "purpose": "Deterministic Diurnal Inversion, Commute Scenarios, Alveolar Dose & Carbon Math", "tests": 15, "status": "passed" },
       { "name": "cadrEngine.test.ts", "purpose": "Room Volume, CADR Sizing, 95% Clearance Decay Math & Corsi-Rosenthal Specifications", "tests": 10, "status": "passed" },
+      { "name": "accessibility.test.tsx", "purpose": "Tier 4: WCAG 2.2 AA Landmarks, Skip-Links, Input Labels, ARIA States & Twin Representation", "tests": 10, "status": "passed" },
       { "name": "api.test.ts", "purpose": "Live Express 5 Backend HTTP Routes, Helmet CSP, Cache Hit (<20ms), Type Guards & Splat Fallback", "tests": 10, "status": "passed" },
       { "name": "geminiService.test.ts", "purpose": "Gemini Model Bridge, LaTeX Math Cleaning, JSON Extraction & Cache Hits", "tests": 9, "status": "passed" },
       { "name": "openMeteoService.test.ts", "purpose": "Keyless Open-Meteo REST Telemetry, Geocoding, NAQI / US AQI Calibration & Network Fallback", "tests": 8, "status": "passed" },
@@ -43,7 +44,7 @@
   "buildSummary": {
     "builder": "vite v6.4.6 + tsc -b",
     "status": "success",
-    "bundleSize": "281.01 kB (88.39 kB gzip)"
+    "bundleSize": "281.06 kB (88.42 kB gzip)"
   },
   "frameworkVersions": {
     "react": "19.1.0",

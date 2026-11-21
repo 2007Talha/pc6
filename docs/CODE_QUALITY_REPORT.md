@@ -28,7 +28,7 @@
 
 ## 2. Static Analysis & Linter Verification
 
-- **Oxlint v1.94.0:** `npm run lint` (`oxlint --deny-warnings`) passes with **0 errors and 0 warnings** across all 52 files.
+- **Oxlint v1.94.0:** `npm run lint` (`oxlint --deny-warnings`) passes with **0 errors and 0 warnings** across all 53 files.
 - **ESLint v9.25.0:** `npm run lint:eslint` passes with **0 errors and 0 warnings**.
 - **TypeScript:** `npm run typecheck` (`tsc --noEmit`) passes with zero errors under strict mode.
 
@@ -37,10 +37,10 @@
 ## 3. Test Coverage & Execution Metrics
 
 - **Test Runner:** Vitest v3.1.4 + JSDOM.
-- **Total Test Suites:** 9 test suites.
-- **Total Tests:** 91 automated tests (100% pass rate, 0 failed).
-- **Execution Speed:** Complete test suite runs in under 4.9 seconds.
-- **Tiers Covered:** Tiers 1 through 5 (Algorithmic math, services, security validation, DOM accessibility, and Express 5 live HTTP endpoints).
+- **Total Test Suites:** 10 test suites.
+- **Total Tests:** 101 automated tests (100% pass rate, 0 failed).
+- **Execution Speed:** Complete test suite runs in under 5.3 seconds.
+- **Tiers Covered:** Tiers 1 through 5 (Algorithmic math, services, security validation, DOM accessibility, WCAG 2.2 AA landmarks, and Express 5 live HTTP endpoints).
 
 ---
 

@@ -28,7 +28,7 @@ export function App() {
         Skip to main content
       </a>
       <Header theme={theme} onToggleTheme={toggleTheme} />
-      <main className="main-content" id="main-content">
+      <main className="main-content" id="main-content" role="main" tabIndex={-1}>
         <ContextForm
           onSubmit={handleSubmit}
           onReset={reset}
@@ -41,7 +41,7 @@ export function App() {
         </div>
         <GuidanceResults state={state} onRetry={handleRetry} />
       </main>
-      <footer className="app-footer">
+      <footer className="app-footer" role="contentinfo">
         <p>
           VayuShield — Empowering families and communities to navigate winter smog safely.
           Built with care for cleaner air.
