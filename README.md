@@ -1,10 +1,14 @@
-# 🛡️ VayuShield — Smart Air Quality Guidance for Families & Communities
+<div align="center">
+  <img src="public/logo.jpg" alt="VayuShield Logo" width="130" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <h1>🛡️ VayuShield</h1>
+  <p><strong>Smart Air Quality Guidance for Families & Communities</strong></p>
 
-[![PromptWars Grade Target](https://img.shields.io/badge/Evaluation-Grade%2098%2B-brightgreen)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict%20Zero--Any-blue)](#)
-[![Architecture](https://img.shields.io/badge/Engine-Hybrid%20GenAI%20%2B%20Deterministic-orange)](#)
-[![WCAG](https://img.shields.io/badge/Accessibility-WCAG%20AA%20Compliant-purple)](#)
-[![License](https://img.shields.io/badge/License-MIT-gray)](#)
+  [![PromptWars Grade Target](https://img.shields.io/badge/Evaluation-Grade%2098%2B-brightgreen)](#)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%20Zero--Any-blue)](#)
+  [![Architecture](https://img.shields.io/badge/Engine-Hybrid%20GenAI%20%2B%20Deterministic-orange)](#)
+  [![WCAG](https://img.shields.io/badge/Accessibility-WCAG%20AA%20Compliant-purple)](#)
+  [![License](https://img.shields.io/badge/License-MIT-gray)](#)
+</div>
 
 > **VayuShield** is a context-aware, winter smog defense application engineered to help urban households, vulnerable demographics (young children, respiratory patients), and community coordinators navigate severe air pollution crises through personalized, actionable, and low-emission guidance.
 

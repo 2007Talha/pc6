@@ -138,8 +138,11 @@ p {
   gap: 0.75rem;
 }
 
-.logo-area img {
+.app-logo {
   flex-shrink: 0;
+  border-radius: var(--radius);
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
 }
 
 .tagline {

@@ -10,7 +10,13 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
     <header className="app-header" role="banner">
       <div className="header-content">
         <div className="logo-area">
-          <img src="/vite.svg" alt="VayuShield shield logo" width="36" height="36" />
+          <img
+            src="/logo.jpg"
+            alt="VayuShield logo"
+            className="app-logo"
+            width="42"
+            height="42"
+          />
           <div>
             <h1>VayuShield</h1>
             <p className="tagline">Smart Air Quality Guidance for Families &amp; Communities</p>
