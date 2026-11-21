@@ -5,9 +5,10 @@ const path = require('path');
 async function runDemoRecorder() {
   console.log('🎥 Launching browser with video recorder...');
   const videosDir = path.resolve(__dirname, '../videos');
-  if (!fs.existsSync(videosDir)) {
-    fs.mkdirSync(videosDir, { recursive: true });
+  if (fs.existsSync(videosDir)) {
+    fs.rmSync(videosDir, { recursive: true, force: true });
   }
+  fs.mkdirSync(videosDir, { recursive: true });
 
   const browser = await chromium.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -36,12 +37,12 @@ async function runDemoRecorder() {
   console.log('🌐 Navigating to http://localhost:5173/ ...');
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 
-  console.log('🎬 Injecting walkthrough script in browser...');
+  console.log('🎬 Injecting visual cursor walkthrough in browser...');
   const scriptPath = path.resolve(__dirname, 'walkthrough_automation.js');
   await page.addScriptTag({ path: scriptPath });
 
-  console.log('⏳ Waiting for automated walkthrough to finish...');
-  await page.waitForFunction(() => window.__DEMO_FINISHED__ === true, null, { timeout: 180000 });
+  console.log('⏳ Waiting for visual cursor walkthrough to complete...');
+  await page.waitForFunction(() => window.__DEMO_FINISHED__ === true, null, { timeout: 240000 });
 
   console.log('⏳ Allowing buffer frames...');
   await page.waitForTimeout(2000);
@@ -61,8 +62,13 @@ async function runDemoRecorder() {
   fs.copyFileSync(videoPath, targetVideoPath);
   fs.copyFileSync(videoPath, targetMp4Path);
 
+  // Clean up temp directory
+  try {
+    fs.rmSync(videosDir, { recursive: true, force: true });
+  } catch (_) {}
+
   const stats = fs.statSync(targetVideoPath);
-  console.log(`✅ Video recorded successfully!`);
+  console.log(`✅ Video recorded successfully with visible moving cursor!`);
   console.log(`📁 File saved: ${targetVideoPath} (${(stats.size / (1024 * 1024)).toFixed(2)} MB)`);
   console.log(`📁 Also available as: ${targetMp4Path}`);
 }
