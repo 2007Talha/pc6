@@ -14,6 +14,7 @@ import {
   validateUserContext,
   hasValidationErrors,
 } from '../utils/validation.ts';
+import { fetchLiveAqi, type LiveAirQualityData } from '../services/openMeteoService.ts';
 
 interface ContextFormProps {
   readonly onSubmit: (ctx: UserContext) => void;
@@ -25,6 +26,9 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
   const [formData, setFormData] = useState<UserContext>(DEFAULT_USER_CONTEXT);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [liveAqi, setLiveAqi] = useState<LiveAirQualityData | null>(null);
+  const [isFetchingAqi, setIsFetchingAqi] = useState(false);
+  const [aqiFetchMsg, setAqiFetchMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
   const updateField = useCallback(<K extends keyof UserContext>(
     field: K,
@@ -39,6 +43,39 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
       });
     }
   }, [submitted]);
+
+  const handleFetchLiveAqi = useCallback(async () => {
+    const city = formData.location.trim();
+    if (!city) {
+      setAqiFetchMsg({ text: 'Enter a city name first (e.g., Delhi, Lahore, Tokyo).', isError: true });
+      return;
+    }
+
+    setIsFetchingAqi(true);
+    setAqiFetchMsg(null);
+
+    try {
+      const data = await fetchLiveAqi(city);
+      if (!data) {
+        setAqiFetchMsg({ text: `Could not find live data for "${city}". Please verify the name.`, isError: true });
+      } else {
+        setLiveAqi(data);
+        setFormData(prev => ({
+          ...prev,
+          location: data.country ? `${data.city}, ${data.country}` : data.city,
+          aqiTier: data.aqiTier,
+        }));
+        setAqiFetchMsg({
+          text: `Fetched live air quality for ${data.city}! Matched tier: ${data.aqiTier.toUpperCase()}`,
+          isError: false,
+        });
+      }
+    } catch {
+      setAqiFetchMsg({ text: 'Network error fetching live AQI. You can select tier manually.', isError: true });
+    } finally {
+      setIsFetchingAqi(false);
+    }
+  }, [formData.location]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +99,8 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
     setFormData(DEFAULT_USER_CONTEXT);
     setErrors({});
     setSubmitted(false);
+    setLiveAqi(null);
+    setAqiFetchMsg(null);
     onReset();
   }, [onReset]);
 
@@ -72,26 +111,55 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
       <h2>Your Air Quality Context</h2>
 
       <div className="form-grid">
-        <div className="form-group">
+        {/* Location with Live AQI Lookup */}
+        <div className="form-group form-group-location">
           <label htmlFor="location">Location / City *</label>
-          <input
-            id="location"
-            type="text"
-            value={formData.location}
-            onChange={e => updateField('location', e.target.value)}
-            placeholder="e.g., New Delhi, Lahore, Beijing"
-            maxLength={100}
-            required
-            aria-required="true"
-            aria-invalid={!!errors.location}
-            aria-describedby={errors.location ? 'location-error' : undefined}
-            disabled={isLoading}
-          />
+          <div className="location-input-group">
+            <input
+              id="location"
+              type="text"
+              value={formData.location}
+              onChange={e => updateField('location', e.target.value)}
+              placeholder="e.g., New Delhi, Lahore, London"
+              maxLength={100}
+              required
+              aria-required="true"
+              aria-invalid={!!errors.location}
+              aria-describedby={errors.location ? 'location-error' : undefined}
+              disabled={isLoading || isFetchingAqi}
+            />
+            <button
+              type="button"
+              className="btn-fetch-aqi"
+              onClick={handleFetchLiveAqi}
+              disabled={isLoading || isFetchingAqi}
+              aria-label="Fetch real-time air quality from Open-Meteo"
+              title="Fetch live PM2.5 & PM10 from Open-Meteo"
+            >
+              {isFetchingAqi ? '⏳ Fetching…' : '📡 Live AQI'}
+            </button>
+          </div>
           {errors.location && (
             <p className="form-error" id="location-error" role="alert">{errors.location}</p>
           )}
+          {aqiFetchMsg && (
+            <p className={`fetch-status-msg ${aqiFetchMsg.isError ? 'error' : 'success'}`} role="status">
+              {aqiFetchMsg.text}
+            </p>
+          )}
+          {liveAqi && (
+            <aside className="live-aqi-card" aria-label="Live Open-Meteo Air Quality">
+              <span className="live-badge-pill">● LIVE OPEN-METEO DATA</span>
+              <div className="live-data-row">
+                <span><strong>PM2.5:</strong> {liveAqi.pm25} µg/m³</span>
+                <span><strong>PM10:</strong> {liveAqi.pm10} µg/m³</span>
+                <span><strong>US AQI:</strong> {liveAqi.usAqi}</span>
+              </div>
+            </aside>
+          )}
         </div>
 
+        {/* AQI Tier */}
         <div className="form-group">
           <label htmlFor="aqiTier">AQI Severity Tier *</label>
           <select
@@ -112,6 +180,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           )}
         </div>
 
+        {/* Household Profile */}
         <div className="form-group">
           <label htmlFor="householdProfile">Household / Community Profile *</label>
           <select
@@ -129,6 +198,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           </select>
         </div>
 
+        {/* Housing Type */}
         <div className="form-group">
           <label htmlFor="housingType">Housing Type *</label>
           <select
@@ -146,6 +216,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           </select>
         </div>
 
+        {/* Commute Mode */}
         <div className="form-group">
           <label htmlFor="commuteMode">Commute Mode *</label>
           <select
@@ -163,6 +234,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           </select>
         </div>
 
+        {/* Cooking Fuel */}
         <div className="form-group">
           <label htmlFor="cookingFuel">Cooking / Heating Fuel *</label>
           <select
@@ -181,6 +253,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
         </div>
       </div>
 
+      {/* Custom Scenario */}
       <div className="form-group form-group-full">
         <label htmlFor="customScenario">
           Custom Scenario / Question (optional)
@@ -189,7 +262,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
           id="customScenario"
           value={formData.customScenario}
           onChange={e => updateField('customScenario', e.target.value)}
-          placeholder="e.g., My child has asthma — what extra precautions during morning school commute?"
+          placeholder="e.g., My child has asthma — what extra precautions should I take during morning school commute?"
           maxLength={CUSTOM_SCENARIO_MAX_LENGTH}
           rows={3}
           disabled={isLoading}
@@ -203,6 +276,7 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
         )}
       </div>
 
+      {/* Actions */}
       <div className="form-actions">
         <button
           type="submit"

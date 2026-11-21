@@ -794,6 +794,81 @@ textarea:focus-visible {
   color: var(--color-text-secondary);
 }
 
+/* --- Live AQI Integration --- */
+.location-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.location-input-group input {
+  flex: 1;
+}
+
+.btn-fetch-aqi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--transition), filter var(--transition);
+}
+
+.btn-fetch-aqi:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-fetch-aqi:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fetch-status-msg {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.fetch-status-msg.success {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.fetch-status-msg.error {
+  color: var(--color-danger);
+}
+
+.live-aqi-card {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background-color: var(--color-surface-elevated);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.live-badge-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+}
+
+.live-data-row {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  color: var(--color-text-primary);
+}
+
 /* --- Responsive (Mobile) --- */
 @media (max-width: 768px) {
   .form-grid {
