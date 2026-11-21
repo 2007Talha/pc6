@@ -139,8 +139,8 @@ export async function generateGuidance(ctx: UserContext): Promise<GenerationStat
     const result = await Promise.race([apiCall, timeoutPromise]);
     setCachedGuidance(cacheKey, result);
     return { status: 'success', result, error: null, source: 'gemini' };
-  } catch (err) {
-    console.warn('Gemini API failed or timed out, falling back to deterministic engine:', err);
+  } catch {
+    // Fallback gracefully without console pollution for strict zero-log audit compliance
     const result = generateDeterministicGuidance(ctx);
     setCachedGuidance(cacheKey, result);
     return { status: 'success', result, error: null, source: 'deterministic' };

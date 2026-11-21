@@ -1,18 +1,18 @@
-name: CI Quality & Build Pipeline
+name: CI Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
-  verify:
+  quality-and-test:
     name: Lint, Test & Build Verification
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Codebase
         uses: actions/checkout@v4
 
       - name: Setup Node.js Runtime
@@ -21,14 +21,17 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install All Dependencies
-        run: npm install
+      - name: Install Project Dependencies
+        run: npm ci || npm install
 
-      - name: Code Quality & Lint Audit
+      - name: Static Code Analysis (Oxlint)
         run: npm run lint
 
-      - name: Automated Multi-Tier Test Suite
-        run: npm test
+      - name: Strict TypeScript Compilation
+        run: npm run typecheck
 
-      - name: Production TypeScript & Vite Bundling
+      - name: Execute Vitest Test Suite (Tiers 1-5)
+        run: npm run test:run
+
+      - name: Production Bundle Compilation
         run: npm run build
