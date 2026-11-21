@@ -76,7 +76,21 @@ export function sanitizeGuidanceText(val: unknown): unknown {
   return val;
 }
 
-/** Safely parse Gemini's JSON response */
+/** Strict runtime type guard for GuidanceResult */
+export function isGuidanceResult(val: unknown): val is GuidanceResult {
+  if (!val || typeof val !== 'object') return false;
+  const obj = val as Record<string, unknown>;
+  return (
+    Array.isArray(obj['dailyRoutine']) &&
+    Array.isArray(obj['iaqHacks']) &&
+    Array.isArray(obj['sustainableAlternatives']) &&
+    typeof obj['impactMetrics'] === 'object' &&
+    obj['impactMetrics'] !== null &&
+    typeof obj['summary'] === 'string'
+  );
+}
+
+/** Safely parse Gemini's JSON response with schema validation */
 export function parseGeminiResponse(raw: string): GuidanceResult {
   let jsonStr = raw.trim();
   const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -85,17 +99,12 @@ export function parseGeminiResponse(raw: string): GuidanceResult {
   }
 
   const parsed: unknown = JSON.parse(jsonStr);
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Response is not a valid JSON object');
+  const sanitized = sanitizeGuidanceText(parsed);
+  if (!isGuidanceResult(sanitized)) {
+    throw new Error('Response does not match required GuidanceResult schema');
   }
 
-  const obj = parsed as Record<string, unknown>;
-
-  if (!Array.isArray(obj['dailyRoutine']) || !Array.isArray(obj['iaqHacks'])) {
-    throw new Error('Response missing required arrays');
-  }
-
-  return sanitizeGuidanceText(parsed) as GuidanceResult;
+  return sanitized;
 }
 
 /** Generate guidance — Cache-first, Gemini-second with defensive timeout and deterministic fallback */

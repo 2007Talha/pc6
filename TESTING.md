@@ -19,28 +19,30 @@ src/test/
 ├── aiCache.test.ts          # Tier 3: In-memory hash caching & LRU capacity pruning (3 tests)
 ├── openMeteoService.test.ts # Tier 4: Open-Meteo REST API geocoding & tier categorization (6 tests)
 ├── geminiService.test.ts    # Tier 4: Gemini model bridge, LaTeX math cleaner & cache hits (9 tests)
-└── App.test.tsx             # Tier 5: End-to-end user flows, landmarks, presets & pledges (6 tests)
+├── exportFormatters.test.ts # Tier 4: Text/Markdown serializer & runtime type guards (3 tests)
+└── App.test.tsx             # Tier 5: End-to-end user flows, skip-links, landmarks, presets & pledges (8 tests)
 ```
 
 ---
 
-## 2. Test Execution Verification Matrix (51 / 51 Passing)
+## 2. Test Execution Verification Matrix (56 / 56 Passing)
 
 ```bash
 $ npm test
 
  RUN  v3.2.7 C:/Users/Talha/A&S/promptwarschallenge6
 
- ✓ src/test/aiCache.test.ts (3 tests)
  ✓ src/test/cadrEngine.test.ts (5 tests)
- ✓ src/test/airQualityEngine.test.ts (8 tests)
  ✓ src/test/openMeteoService.test.ts (6 tests)
+ ✓ src/test/aiCache.test.ts (3 tests)
  ✓ src/test/validation.test.ts (14 tests)
+ ✓ src/test/airQualityEngine.test.ts (8 tests)
+ ✓ src/test/exportFormatters.test.ts (3 tests)
  ✓ src/test/geminiService.test.ts (9 tests)
- ✓ src/test/App.test.tsx (6 tests)
+ ✓ src/test/App.test.tsx (8 tests)
 
- Test Files  7 passed (7)
-      Tests  51 passed (51)
+ Test Files  8 passed (8)
+      Tests  56 passed (56)
 ```
 
 ### Verified Test Breakdown Table
@@ -53,5 +55,6 @@ $ npm test
 | `aiCache.test.ts` | Tier 3: Efficiency & Caching | 3 | Deterministic payload hashing, cache retrieval, and LRU pruning when capacity exceeds 100 entries. | ✅ 3 / 3 Passed |
 | `openMeteoService.test.ts` | Tier 4: Live Telemetry & Geocoding | 6 | Live coordinate lookups, Open-Meteo AQI payload mapping to US AQI and Indian NAQI, and graceful network error handling. | ✅ 6 / 6 Passed |
 | `geminiService.test.ts` | Tier 4: LLM Bridge & Sanitization | 9 | Gemini prompt construction, JSON markdown fence extraction, raw LaTeX cleaning (`$53~\mu g/m^3$` -> `53 µg/m³`), API key detection, and `<5ms` cache hit validation. | ✅ 9 / 9 Passed |
-| `App.test.tsx` | Tier 5: End-to-End React User Flows | 6 | Semantic landmarks, dual Light/Dark theme switching, 1-click test preset loading, form submission, 4 output sections, Inversion Curve, CADR Calculator, Community Action pledge toggles, and clipboard copy. | ✅ 6 / 6 Passed |
-| **TOTAL** | **Comprehensive QA Manifest** | **51** | **100% Passing Coverage Across System Surface** | **✅ 51 / 51 Passed** |
+| `exportFormatters.test.ts` | Tier 4: Text/Markdown Serializers | 3 | Plain text serialization, markdown table generation, and strict `isGuidanceResult` schema validation. | ✅ 3 / 3 Passed |
+| `App.test.tsx` | Tier 5: End-to-End React User Flows | 8 | Bypass skip-link (WCAG 2.4.1), semantic landmarks, dual Light/Dark theme switching, presets, CADR slider interaction, Community Action pledges, and clipboard copy. | ✅ 8 / 8 Passed |
+| **TOTAL** | **Comprehensive QA Manifest** | **56** | **100% Passing Coverage Across System Surface** | **✅ 56 / 56 Passed** |

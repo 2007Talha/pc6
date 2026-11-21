@@ -17,12 +17,16 @@ VayuShield is engineered to comply with **WCAG 2.2 Level AA**, ensuring inclusiv
 
 ---
 
-## 2. Semantic HTML5 Landmark Architecture
+## 2. Semantic HTML5 Landmark & Bypass Navigation Architecture
 
-The application DOM tree is organized into semantic HTML5 landmark tags:
+The application DOM tree is organized into semantic HTML5 landmark tags with a dedicated WCAG 2.4.1 bypass skip-link:
 
 ```text
 ┌────────────────────────────────────────────────────────┐
+│ <a href="#main-content" className="skip-link">         │
+│   Skip to main content                                 │
+│ </a>                                                   │
+├────────────────────────────────────────────────────────┤
 │ <header role="banner" className="app-header">          │
 │   <h1>VayuShield</h1>                                  │
 │   <button aria-label="Switch to light/dark mode">...   │

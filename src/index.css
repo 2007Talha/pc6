@@ -54,6 +54,26 @@
   padding: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  z-index: 999999;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  outline: 2px solid #ffffff;
+}
+
+.skip-link:focus {
+  top: 1rem;
+  left: 1rem;
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;

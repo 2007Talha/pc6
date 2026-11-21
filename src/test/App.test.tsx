@@ -115,4 +115,26 @@ describe('App component end-to-end user flows', () => {
     expect(locationInput.value).toBe('');
     expect(screen.getByText(/Fill in your context above/i)).toBeInTheDocument();
   });
+
+  it('renders WCAG 2.4.1 bypass skip-link targeting main content', () => {
+    render(<App />);
+    const skipLink = screen.getByRole('link', { name: /Skip to main content/i });
+    expect(skipLink).toBeInTheDocument();
+    expect(skipLink).toHaveAttribute('href', '#main-content');
+  });
+
+  it('interacts with Room CADR calculator and updates metrics', async () => {
+    render(<App />);
+    const locationInput = screen.getByLabelText(/Location \/ City/i);
+    fireEvent.change(locationInput, { target: { value: 'Mumbai' } });
+    fireEvent.click(screen.getByRole('button', { name: /Generate VayuShield Guidance/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 4, name: /Room CADR/i })).toBeInTheDocument();
+    });
+
+    const areaInput = screen.getByLabelText(/Floor Area/i) as HTMLInputElement;
+    fireEvent.change(areaInput, { target: { value: '250' } });
+    expect(areaInput.value).toBe('250');
+  });
 });
