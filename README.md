@@ -201,3 +201,11 @@ npm run lint
 | **Efficiency & Performance** | 15% | In-memory hash-keyed LRU response cache (`aiCache.ts`) with **<5ms warm execution** (99.5% latency reduction). Ultra-compact repository footprint (**~0.60 MB**, well under 2 MB target). Sub-second production bundling (**~1.1s**). See [EFFICIENCY.md](file:///c:/Users/Talha/A&S/promptwarschallenge6/EFFICIENCY.md). | **100 / 100** |
 | **Automated Testing** | 15% | **51 / 51 tests passing** across 7 test suites (CADR Engine, AI Cache, Air Quality Engine, Validation, Open-Meteo Service, Gemini Fallback, and full End-to-End React User Flows with JSDOM and RTL). See [TESTING.md](file:///c:/Users/Talha/A&S/promptwarschallenge6/TESTING.md). | **100 / 100** |
 | **Accessibility & Design** | 10% | WCAG 2.2 Level AA compliant. Semantic landmarks (`<header role="banner">`, `<main>`, `<section aria-labelledby>`, `<article>`), visible `:focus-visible` keyboard rings, `aria-live` dynamic announcements, Twin Representation Rule (native SVG with paired `.sr-only` twins), and high-contrast dual theme (Light & Dark). See [ACCESSIBILITY.md](file:///c:/Users/Talha/A&S/promptwarschallenge6/ACCESSIBILITY.md). | **100 / 100** |
+
+---
+
+## 🎬 Demo Video & Browser Automation Walkthrough
+
+- **3-Minute Silent Demo Video Plan:** Complete storyboard with scene-by-scene timing (3:15 total duration), verbatim captions, and step-by-step Google Vids editing & submission guide. See [docs/DEMO_WALKTHROUGH_PLAN.md](file:///c:/Users/Talha/A&S/promptwarschallenge6/docs/DEMO_WALKTHROUGH_PLAN.md).
+- **Automated Browser Walkthrough Runner:** One-paste automated script that executes all 5 live scenes in the browser console with deliberate 1.5–2.5s readable pauses, smooth typing animations, and progress indicators for recording without manual mistakes. See [scripts/walkthrough_automation.js](file:///c:/Users/Talha/A&S/promptwarschallenge6/scripts/walkthrough_automation.js).
+
