@@ -21,6 +21,7 @@ describe('airQualityEngine', () => {
     expect(result.iaqHacks.length).toBeGreaterThanOrEqual(4);
     expect(result.sustainableAlternatives.length).toBeGreaterThanOrEqual(3);
     expect(result.impactMetrics).toBeDefined();
+    expect(result.impactMetrics.dailyInhaledDoseAvoidedUg).toBeGreaterThan(0);
     expect(result.summary).toContain('New Delhi');
   });
 

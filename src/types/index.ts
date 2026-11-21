@@ -74,9 +74,29 @@ export interface SustainableAlternative {
 export interface ImpactMetrics {
   readonly pm25ReductionPercent: number;
   readonly weeklyCo2eAvoidedKg: number;
+  readonly dailyInhaledDoseAvoidedUg?: number;
   readonly healthBenefit: string;
   readonly communityBenefit: string;
   readonly explanation: string;
+}
+
+/** Community action pledge item */
+export interface CommunityPledge {
+  readonly id: string;
+  readonly title: string;
+  readonly description: string;
+  readonly co2eSavedKgPerWeek: number;
+  readonly pm25AvertedGramsPerWeek: number;
+  readonly icon: string;
+  readonly active: boolean;
+}
+
+/** Collective community impact summary */
+export interface CommunityImpactSummary {
+  readonly activePledgesCount: number;
+  readonly weeklyCo2eAvoidedKg: number;
+  readonly weeklyPm25AvertedGrams: number;
+  readonly householdsProtected: number;
 }
 
 /** Full structured guidance output */
@@ -95,7 +115,7 @@ export interface GenerationState {
   readonly status: GenerationStatus;
   readonly result: GuidanceResult | null;
   readonly error: string | null;
-  readonly source: 'gemini' | 'deterministic' | null;
+  readonly source: 'gemini' | 'deterministic' | 'cached' | null;
 }
 
 /** Form validation error map */

@@ -452,6 +452,12 @@ textarea:focus-visible {
   color: var(--color-primary);
 }
 
+.source-cached {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
 .source-deterministic {
   background-color: rgba(5, 150, 105, 0.12);
   color: var(--color-accent);
@@ -999,4 +1005,314 @@ textarea:focus-visible {
   .tagline {
     display: none;
   }
+}
+
+/* --- Inversion Curve Card --- */
+.inversion-curve-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.inversion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.inversion-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.inversion-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.inversion-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.svg-chart-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.inversion-svg {
+  width: 100%;
+  height: auto;
+  min-height: 140px;
+}
+
+/* --- CADR Calculator Card --- */
+.cadr-calculator-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.cadr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cadr-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.cadr-intro {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.cadr-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cadr-input-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.cadr-input-group input,
+.cadr-input-group select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.cadr-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cadr-stat {
+  padding: 0.75rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.cadr-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.cadr-stat-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.corsi-blueprint-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+}
+
+.corsi-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.corsi-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.corsi-stats {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- Community Action & Pledges Card --- */
+.community-pledges-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.community-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.community-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.community-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(5, 150, 105, 0.12);
+  color: var(--color-accent);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.community-intro {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.pledge-summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pledge-summary-stat {
+  padding: 0.75rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.stat-num {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.stat-sub {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.pledge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
+.pledge-item {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pledge-active {
+  border-color: var(--color-accent);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.pledge-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.pledge-icon {
+  font-size: 1.2rem;
+}
+
+.pledge-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.btn-pledge-toggle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-pledge-toggle.btn-active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.pledge-desc {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.pledge-metrics {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }

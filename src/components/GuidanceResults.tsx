@@ -4,6 +4,9 @@ import { DailyRoutineSection } from './DailyRoutineSection.tsx';
 import { IaqHacksSection } from './IaqHacksSection.tsx';
 import { AlternativesSection } from './AlternativesSection.tsx';
 import { ImpactMetricsSection } from './ImpactMetricsSection.tsx';
+import { InversionCurve } from './InversionCurve.tsx';
+import { CadrCalculator } from './CadrCalculator.tsx';
+import { CommunityPledgesSection } from './CommunityPledgesSection.tsx';
 
 interface GuidanceResultsProps {
   readonly state: GenerationState;
@@ -143,7 +146,7 @@ export function GuidanceResults({ state, onRetry }: GuidanceResultsProps) {
         <div className="results-meta">
           {source && (
             <span className={`source-badge source-${source}`}>
-              {source === 'gemini' ? '✨ Gemini AI' : '⚙️ Deterministic Engine'}
+              {source === 'gemini' ? '✨ Gemini AI' : source === 'cached' ? '⚡ Cached (<5ms)' : '⚙️ Deterministic Engine'}
             </span>
           )}
           <div className="export-actions">
@@ -172,8 +175,11 @@ export function GuidanceResults({ state, onRetry }: GuidanceResultsProps) {
       </div>
 
       <DailyRoutineSection blocks={result.dailyRoutine} />
+      <InversionCurve />
       <IaqHacksSection hacks={result.iaqHacks} />
+      <CadrCalculator />
       <AlternativesSection alternatives={result.sustainableAlternatives} />
+      <CommunityPledgesSection />
       <ImpactMetricsSection metrics={result.impactMetrics} />
     </div>
   );

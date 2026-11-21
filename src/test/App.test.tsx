@@ -75,6 +75,17 @@ describe('App component end-to-end user flows', () => {
     expect(screen.getByRole('heading', { level: 3, name: /Sustainable Alternatives/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 3, name: /Quantified Direct Impact/i })).toBeInTheDocument();
 
+    // Verify Inversion Curve, CADR Calculator & Community Action sections
+    expect(screen.getByRole('heading', { level: 4, name: /Diurnal Smog Inversion Profile/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 4, name: /Room CADR & DIY Air Cleaner Sizer/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: /Collective Community Action/i })).toBeInTheDocument();
+
+    // Test community pledge toggle
+    const pledgeBtn = screen.getByRole('button', { name: /Toggle pledge: RWA Clean-Air Respite Room/i });
+    expect(pledgeBtn).toBeInTheDocument();
+    fireEvent.click(pledgeBtn);
+    expect(screen.getByText(/4 Active Pledges/i)).toBeInTheDocument();
+
     // Verify deterministic engine badge
     expect(screen.getByText(/Deterministic Engine/i)).toBeInTheDocument();
 

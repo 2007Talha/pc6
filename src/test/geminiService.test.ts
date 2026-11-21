@@ -67,13 +67,18 @@ describe('geminiService', () => {
     expect(() => parseGeminiResponse('not json')).toThrow();
   });
 
-  it('falls back to deterministic engine when API key is unset', async () => {
+  it('falls back to deterministic engine when API key is unset and caches response', async () => {
     // When no API key is provided, should use deterministic engine
     const state = await generateGuidance(testContext);
     expect(state.status).toBe('success');
     expect(state.source).toBe('deterministic');
     expect(state.result).not.toBeNull();
     expect(state.result?.dailyRoutine.length).toBeGreaterThan(0);
+
+    // Second call with same context should hit in-memory LRU cache (<5ms)
+    const cachedState = await generateGuidance(testContext);
+    expect(cachedState.status).toBe('success');
+    expect(cachedState.source).toBe('cached');
   });
 
   it('correctly reports API key status', () => {

@@ -1,6 +1,7 @@
 import type { UserContext, GuidanceResult, GenerationState } from '../types/index.ts';
 import { generateDeterministicGuidance } from './airQualityEngine.ts';
 import { AQI_TIERS, HOUSEHOLD_PROFILES } from '../constants/index.ts';
+import { hashPayload, getCachedGuidance, setCachedGuidance } from './aiCache.ts';
 
 /** Strip HTML tags and common prompt injection patterns */
 export function sanitizeInput(input: string, maxLength = 500): string {
@@ -97,10 +98,17 @@ export function parseGeminiResponse(raw: string): GuidanceResult {
   return sanitizeGuidanceText(parsed) as GuidanceResult;
 }
 
-/** Generate guidance — Gemini-first with defensive timeout and deterministic fallback */
+/** Generate guidance — Cache-first, Gemini-second with defensive timeout and deterministic fallback */
 export async function generateGuidance(ctx: UserContext): Promise<GenerationState> {
+  const cacheKey = hashPayload(ctx);
+  const cached = getCachedGuidance(cacheKey);
+  if (cached) {
+    return { status: 'success', result: cached, error: null, source: 'cached' };
+  }
+
   if (!isApiKeyConfigured()) {
     const result = generateDeterministicGuidance(ctx);
+    setCachedGuidance(cacheKey, result);
     return { status: 'success', result, error: null, source: 'deterministic' };
   }
 
@@ -120,10 +128,12 @@ export async function generateGuidance(ctx: UserContext): Promise<GenerationStat
     })();
 
     const result = await Promise.race([apiCall, timeoutPromise]);
+    setCachedGuidance(cacheKey, result);
     return { status: 'success', result, error: null, source: 'gemini' };
   } catch (err) {
     console.warn('Gemini API failed or timed out, falling back to deterministic engine:', err);
     const result = generateDeterministicGuidance(ctx);
+    setCachedGuidance(cacheKey, result);
     return { status: 'success', result, error: null, source: 'deterministic' };
   }
 }

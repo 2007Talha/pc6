@@ -437,14 +437,22 @@ function calculateImpactMetrics(ctx: UserContext): ImpactMetrics {
     'community-coordinator': 'RWA coordination eliminates leaf burning and establishes collective clean-air shelters.',
   };
 
+  const baselinePm25Concentration: Record<string, number> = {
+    moderate: 60, poor: 150, 'very-poor': 260, severe: 420,
+  };
+  const ambientUg = baselinePm25Concentration[ctx.aqiTier] ?? 150;
+  const dailyInhaledDoseAvoidedUg = Math.round(ambientUg * 15 * (pm25 / 100));
+
   const explanation = `PM2.5 reduction: ~${pm25}% (Base ${pm25Base[ctx.aqiTier] ?? 20}% for ${ctx.aqiTier} AQI`
     + ` + ${ctx.housingType === 'apartment' ? '5% apartment seal advantage' : '0%'} `
     + `+ ${ctx.cookingFuel === 'solid-fuel' ? '8% solid-fuel cleanup' : ctx.cookingFuel === 'electric' ? '2% electric advantage' : '0%'}). `
-    + `Avoided CO₂e: ~${totalCo2e} kg/week [Commute: ${commute.desc} | Fuel: ${fuel.desc}].`;
+    + `Avoided CO₂e: ~${totalCo2e} kg/week [Commute: ${commute.desc} | Fuel: ${fuel.desc}]. `
+    + `Avoided Inhaled Alveolar PM2.5 Dose: ~${dailyInhaledDoseAvoidedUg} µg/day.`;
 
   return {
     pm25ReductionPercent: pm25,
     weeklyCo2eAvoidedKg: totalCo2e,
+    dailyInhaledDoseAvoidedUg,
     healthBenefit: healthMap[ctx.householdProfile] ?? 'Improvement in respiratory stamina and cardiovascular comfort.',
     communityBenefit: communityMap[ctx.householdProfile] ?? 'Lower collective emissions create a healthier neighborhood.',
     explanation,

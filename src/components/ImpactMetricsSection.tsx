@@ -20,6 +20,12 @@ export function ImpactMetricsSection({ metrics }: ImpactMetricsSectionProps) {
           <span className="metric-value">~{metrics.weeklyCo2eAvoidedKg} kg</span>
           <span className="metric-label">Weekly CO₂e Avoided</span>
         </div>
+        {metrics.dailyInhaledDoseAvoidedUg !== undefined && (
+          <div className="metric-card metric-dose">
+            <span className="metric-value">~{metrics.dailyInhaledDoseAvoidedUg} µg</span>
+            <span className="metric-label">Inhaled Dose Avoided / Day</span>
+          </div>
+        )}
         <div className="metric-card metric-health">
           <span className="metric-icon" aria-hidden="true">❤️</span>
           <span className="metric-label">Health Benefit</span>
