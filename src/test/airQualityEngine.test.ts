@@ -137,9 +137,9 @@ describe('airQualityEngine', () => {
   it('scales inhaled alveolar dose averted proportionally with ambient AQI level', () => {
     const poorResult = generateDeterministicGuidance({ ...baseContext, aqiTier: 'poor' });
     const severeResult = generateDeterministicGuidance({ ...baseContext, aqiTier: 'severe' });
-    expect(severeResult.impactMetrics.dailyInhaledDoseAvoidedUg).toBeGreaterThan(
-      poorResult.impactMetrics.dailyInhaledDoseAvoidedUg,
-    );
+    const severeDose = severeResult.impactMetrics.dailyInhaledDoseAvoidedUg ?? 0;
+    const poorDose = poorResult.impactMetrics.dailyInhaledDoseAvoidedUg ?? 0;
+    expect(severeDose).toBeGreaterThan(poorDose);
   });
 
   it('reflects custom user scenarios directly in generated summary', () => {
