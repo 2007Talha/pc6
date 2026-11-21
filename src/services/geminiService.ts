@@ -1,0 +1,93 @@
+import type { UserContext, GuidanceResult, GenerationState } from '../types/index.ts';
+import { generateDeterministicGuidance } from './airQualityEngine.ts';
+import { AQI_TIERS, HOUSEHOLD_PROFILES } from '../constants/index.ts';
+
+/** Strip HTML tags and common prompt injection patterns */
+export function sanitizeInput(input: string, maxLength = 500): string {
+  return input
+    .replace(/<[^>]*>/g, '')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .replace(/on\w+\s*=/gi, '')
+    .trim()
+    .slice(0, maxLength);
+}
+
+/** Check whether the Gemini API key is configured */
+export function isApiKeyConfigured(): boolean {
+  const key = import.meta.env.VITE_GEMINI_API_KEY;
+  return typeof key === 'string' && key.trim().length > 0;
+}
+
+/** Build a structured prompt for Gemini */
+export function buildPrompt(ctx: UserContext): string {
+  const tierInfo = AQI_TIERS.find(t => t.id === ctx.aqiTier);
+  const profileInfo = HOUSEHOLD_PROFILES.find(p => p.id === ctx.householdProfile);
+
+  return `You are VayuShield, an expert air quality advisor for Indian winter smog conditions.
+Given the user's context below, return ONLY valid JSON (no markdown, no explanation) matching this exact structure:
+{
+  "dailyRoutine": [{"time":"string","activity":"string","reason":"string","icon":"emoji"}],
+  "iaqHacks": [{"title":"string","steps":["string"],"applicableTo":["apartment"|"independent-house"],"priority":"high"|"medium"|"low"}],
+  "sustainableAlternatives": [{"category":"string","current":"string","alternative":"string","benefit":"string","icon":"emoji"}],
+  "impactMetrics": {"pm25ReductionPercent":number,"weeklyCo2eAvoidedKg":number,"healthBenefit":"string","communityBenefit":"string","explanation":"string"},
+  "summary": "string"
+}
+
+User Context:
+- Location: ${sanitizeInput(ctx.location, 100)}
+- AQI Tier: ${tierInfo?.label ?? ctx.aqiTier} (${tierInfo?.range ?? 'N/A'}) — ${tierInfo?.description ?? ''}
+- Profile: ${profileInfo?.label ?? ctx.householdProfile} — ${profileInfo?.description ?? ''}
+- Housing: ${ctx.housingType}
+- Commute: ${ctx.commuteMode}
+- Cooking Fuel: ${ctx.cookingFuel}
+${ctx.customScenario ? `- Custom Scenario: ${sanitizeInput(ctx.customScenario)}` : ''}
+
+Provide 6-8 daily routine blocks, 4-6 IAQ hacks, 4-5 sustainable alternatives, and quantified impact metrics with transparent calculations. All advice must be specific to the user's context.`;
+}
+
+/** Safely parse Gemini's JSON response */
+export function parseGeminiResponse(raw: string): GuidanceResult {
+  // Extract JSON from markdown code fences if present
+  let jsonStr = raw.trim();
+  const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch?.[1]) {
+    jsonStr = fenceMatch[1].trim();
+  }
+
+  const parsed: unknown = JSON.parse(jsonStr);
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Response is not a valid JSON object');
+  }
+
+  const obj = parsed as Record<string, unknown>;
+
+  if (!Array.isArray(obj['dailyRoutine']) || !Array.isArray(obj['iaqHacks'])) {
+    throw new Error('Response missing required arrays');
+  }
+
+  return parsed as GuidanceResult;
+}
+
+/** Generate guidance — Gemini-first with deterministic fallback */
+export async function generateGuidance(ctx: UserContext): Promise<GenerationState> {
+  if (!isApiKeyConfigured()) {
+    const result = generateDeterministicGuidance(ctx);
+    return { status: 'success', result, error: null, source: 'deterministic' };
+  }
+
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const prompt = buildPrompt(ctx);
+    const response = await model.generateContent(prompt);
+    const text = response.response.text();
+    const result = parseGeminiResponse(text);
+    return { status: 'success', result, error: null, source: 'gemini' };
+  } catch (err) {
+    console.warn('Gemini API failed, falling back to deterministic engine:', err);
+    const result = generateDeterministicGuidance(ctx);
+    return { status: 'success', result, error: null, source: 'deterministic' };
+  }
+}
