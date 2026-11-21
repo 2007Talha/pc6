@@ -8,6 +8,8 @@ import {
   COOKING_FUEL_OPTIONS,
   CUSTOM_SCENARIO_MAX_LENGTH,
   DEFAULT_USER_CONTEXT,
+  QUICK_PRESETS,
+  type QuickPreset,
 } from '../constants/index.ts';
 import {
   sanitizeTextInput,
@@ -43,6 +45,17 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
       });
     }
   }, [submitted]);
+
+  const handleApplyPreset = useCallback((preset: QuickPreset) => {
+    setFormData(preset.context);
+    setErrors({});
+    setSubmitted(false);
+    setLiveAqi(null);
+    setAqiFetchMsg({
+      text: `Loaded "${preset.label}" scenario preset. Click Generate or customize parameters.`,
+      isError: false,
+    });
+  }, []);
 
   const handleFetchLiveAqi = useCallback(async () => {
     const city = formData.location.trim();
@@ -108,7 +121,29 @@ export function ContextForm({ onSubmit, onReset, generationStatus }: ContextForm
 
   return (
     <form onSubmit={handleSubmit} onReset={handleReset} className="context-form" noValidate>
-      <h2>Your Air Quality Context</h2>
+      <div className="form-title-row">
+        <h2>Your Air Quality Context</h2>
+        <span className="form-subtitle">Customize parameters or load a quick scenario</span>
+      </div>
+
+      {/* 1-Click Test Scenarios */}
+      <div className="presets-container" role="region" aria-label="Quick test scenario presets">
+        <span className="presets-label">⚡ 1-Click Test Presets:</span>
+        <div className="presets-buttons">
+          {QUICK_PRESETS.map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              className="btn-preset"
+              onClick={() => handleApplyPreset(preset)}
+              disabled={isLoading || isFetchingAqi}
+              title={`Load preset: ${preset.label}`}
+            >
+              <span aria-hidden="true">{preset.icon}</span> {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="form-grid">
         {/* Location with Live AQI Lookup */}

@@ -5,9 +5,13 @@ import type {
   IaqHack,
   SustainableAlternative,
   ImpactMetrics,
+  HousingType,
+  CookingFuel,
+  CommuteMode,
+  HouseholdProfile,
 } from '../types/index.ts';
 
-function getMorningCommuteBlock(mode: UserContext['commuteMode']): TimeBlock {
+function getMorningCommuteBlock(mode: CommuteMode): TimeBlock {
   if (mode === 'work-from-home') {
     return {
       time: '7:30–8:30 AM',
@@ -40,7 +44,7 @@ function getMorningCommuteBlock(mode: UserContext['commuteMode']): TimeBlock {
   };
 }
 
-function getEveningCommuteBlock(mode: UserContext['commuteMode']): TimeBlock | null {
+function getEveningCommuteBlock(mode: CommuteMode): TimeBlock | null {
   if (mode === 'work-from-home') return null;
   if (mode === 'public-transit') {
     return {
@@ -66,11 +70,29 @@ function getEveningCommuteBlock(mode: UserContext['commuteMode']): TimeBlock | n
   };
 }
 
+function getDemographicRoutineBlock(profile: HouseholdProfile): TimeBlock | null {
+  if (profile === 'family-young-children') {
+    return {
+      time: '9:00 AM',
+      activity: "Children's indoor learning & play",
+      reason: 'Children breathe 50% faster than adults; keep them indoors until midday sun breaks the inversion layer.',
+      icon: '📚',
+    };
+  }
+  if (profile === 'elderly-respiratory') {
+    return {
+      time: '9:00 AM',
+      activity: 'Medication check & pursed-lip breathing',
+      reason: 'Elevated AQI triggers COPD/asthma spasms; ensure rescue inhalers are near and practice diaphragmatic breathing.',
+      icon: '💊',
+    };
+  }
+  return null;
+}
+
 function generateDailyRoutine(ctx: UserContext): TimeBlock[] {
   const blocks: TimeBlock[] = [];
   const isSevere = ctx.aqiTier === 'severe' || ctx.aqiTier === 'very-poor';
-  const isChild = ctx.householdProfile === 'family-young-children';
-  const isElderly = ctx.householdProfile === 'elderly-respiratory';
 
   blocks.push({
     time: '6:00–7:00 AM',
@@ -81,24 +103,9 @@ function generateDailyRoutine(ctx: UserContext): TimeBlock[] {
 
   blocks.push(getMorningCommuteBlock(ctx.commuteMode));
 
-  if (isChild) {
-    blocks.push({
-      time: '9:00 AM',
-      activity: "Children's indoor learning & play",
-      reason: 'Children breathe 50% faster than adults; keep them indoors until midday sun breaks the inversion layer.',
-      icon: '📚',
-    });
-  }
-  if (isElderly) {
-    blocks.push({
-      time: '9:00 AM',
-      activity: 'Medication check & pursed-lip breathing',
-      reason: 'Elevated AQI triggers COPD/asthma spasms; ensure rescue inhalers are near and practice diaphragmatic breathing.',
-      icon: '💊',
-    });
-  }
+  const demoBlock = getDemographicRoutineBlock(ctx.householdProfile);
+  if (demoBlock) blocks.push(demoBlock);
 
-  // Synchronized midday window (12:00 PM - 2:30 PM)
   blocks.push({
     time: '12:00–2:30 PM',
     activity: isSevere ? 'Brief outdoor window & timed ventilation (10 min)' : 'Midday cross-ventilation window (20–30 min)',
@@ -130,12 +137,9 @@ function generateDailyRoutine(ctx: UserContext): TimeBlock[] {
   return blocks;
 }
 
-function generateIaqHacks(ctx: UserContext): IaqHack[] {
-  const hacks: IaqHack[] = [];
-  const isSevere = ctx.aqiTier === 'severe' || ctx.aqiTier === 'very-poor';
-
-  if (ctx.housingType === 'apartment') {
-    hacks.push({
+function getHousingIaqHack(housingType: HousingType): IaqHack {
+  if (housingType === 'apartment') {
+    return {
       title: 'Seal Door Gaps & Window Frames',
       steps: [
         'Apply self-adhesive foam weather-stripping around entrance doors and balcony sliders.',
@@ -145,22 +149,23 @@ function generateIaqHacks(ctx: UserContext): IaqHack[] {
       ],
       applicableTo: ['apartment'],
       priority: 'high',
-    });
-  } else {
-    hacks.push({
-      title: 'Timed Cross-Ventilation Strategy',
-      steps: [
-        'Open opposite-facing windows strictly between 12:00 PM–2:30 PM when solar thermals disperse ground-level smog to daily lows.',
-        'Install fine mesh screens with PM2.5-rated electrostatic filters on ground-floor windows.',
-        'Seal ground-floor door gaps with rubber gaskets to block road dust ingress.',
-        'Run ceiling fans on low during ventilation to circulate fresh air evenly.',
-      ],
-      applicableTo: ['independent-house'],
-      priority: 'high',
-    });
+    };
   }
+  return {
+    title: 'Timed Cross-Ventilation Strategy',
+    steps: [
+      'Open opposite-facing windows strictly between 12:00 PM–2:30 PM when solar thermals disperse ground-level smog to daily lows.',
+      'Install fine mesh screens with PM2.5-rated electrostatic filters on ground-floor windows.',
+      'Seal ground-floor door gaps with rubber gaskets to block road dust ingress.',
+      'Run ceiling fans on low during ventilation to circulate fresh air evenly.',
+    ],
+    applicableTo: ['independent-house'],
+    priority: 'high',
+  };
+}
 
-  hacks.push({
+function getPurifierIaqHack(isSevere: boolean): IaqHack {
+  return {
     title: isSevere ? 'Run HEPA Purifier 24/7' : 'Strategic Air Purifier Usage',
     steps: isSevere
       ? [
@@ -177,10 +182,12 @@ function generateIaqHacks(ctx: UserContext): IaqHack[] {
         ],
     applicableTo: ['apartment', 'independent-house'],
     priority: 'high',
-  });
+  };
+}
 
-  if (ctx.cookingFuel === 'solid-fuel') {
-    hacks.push({
+function getCookingIaqHack(fuel: CookingFuel): IaqHack {
+  if (fuel === 'solid-fuel') {
+    return {
       title: 'Eliminate Indoor Combustion Sources',
       steps: [
         'Switch immediately to portable induction or subsidized LPG (Ujjwala scheme).',
@@ -190,9 +197,10 @@ function generateIaqHacks(ctx: UserContext): IaqHack[] {
       ],
       applicableTo: ['apartment', 'independent-house'],
       priority: 'high',
-    });
-  } else if (ctx.cookingFuel === 'lpg') {
-    hacks.push({
+    };
+  }
+  if (fuel === 'lpg') {
+    return {
       title: 'Minimize LPG Combustion Byproducts',
       steps: [
         'Run the kitchen exhaust fan throughout cooking and for 15 minutes post-cooking.',
@@ -202,51 +210,58 @@ function generateIaqHacks(ctx: UserContext): IaqHack[] {
       ],
       applicableTo: ['apartment', 'independent-house'],
       priority: 'medium',
-    });
-  } else {
-    hacks.push({
-      title: 'Optimize Electric Kitchen Ventilation',
-      steps: [
-        'Electric cooking produces zero combustion gases, but hot oil still releases particulate fumes.',
-        'Use range hood or kitchen exhaust fan during stir-frying and deep-frying.',
-        'Wipe induction stove surfaces promptly to prevent residue baking onto elements.',
-      ],
-      applicableTo: ['apartment', 'independent-house'],
-      priority: 'low',
-    });
+    };
   }
-
-  // Houseplants with clear, scientifically grounded caveat
-  hacks.push({
-    title: 'Houseplants (Minor Supplementary Wellness Tip)',
+  return {
+    title: 'Optimize Electric Kitchen Ventilation',
     steps: [
-      'Scientific caveat: While plants (snake plants, pothos) offer psychological wellbeing, peer-reviewed IAQ studies confirm they CANNOT filter particulate matter (PM2.5) or replace a HEPA air purifier.',
-      'Keep 1–2 plants per room for indoor biophilic wellness, but rely on certified HEPA filtration for all PM2.5 protection.',
-      'Avoid overwatering soil, as damp indoor potting soil breeds mold spores that severely exacerbate asthma and COPD.',
+      'Electric cooking produces zero combustion gases, but hot oil still releases particulate fumes.',
+      'Use range hood or kitchen exhaust fan during stir-frying and deep-frying.',
+      'Wipe induction stove surfaces promptly to prevent residue baking onto elements.',
     ],
     applicableTo: ['apartment', 'independent-house'],
     priority: 'low',
-  });
-
-  hacks.push({
-    title: 'Wet-Mop and Dust Ingress Control',
-    steps: [
-      'Wet-mop hard floors daily; never dry-sweep, which resuspends settled toxic particulates.',
-      'Wipe furniture and surfaces with damp microfiber cloths.',
-      'Launder curtains and bed linens weekly in hot water during smog season.',
-      'Place damp, high-density doormats at entrance thresholds to trap footwear pollutants.',
-    ],
-    applicableTo: ['apartment', 'independent-house'],
-    priority: 'medium',
-  });
-
-  return hacks;
+  };
 }
 
-function generateAlternatives(ctx: UserContext): SustainableAlternative[] {
-  const alts: SustainableAlternative[] = [];
+function getPlantAndDustIaqHacks(): IaqHack[] {
+  return [
+    {
+      title: 'Houseplants (Minor Supplementary Wellness Tip)',
+      steps: [
+        'Scientific caveat: While plants (snake plants, pothos) offer psychological wellbeing, peer-reviewed IAQ studies confirm they CANNOT filter particulate matter (PM2.5) or replace a HEPA air purifier.',
+        'Keep 1–2 plants per room for indoor biophilic wellness, but rely on certified HEPA filtration for all PM2.5 protection.',
+        'Avoid overwatering soil, as damp indoor potting soil breeds mold spores that severely exacerbate asthma and COPD.',
+      ],
+      applicableTo: ['apartment', 'independent-house'],
+      priority: 'low',
+    },
+    {
+      title: 'Wet-Mop and Dust Ingress Control',
+      steps: [
+        'Wet-mop hard floors daily; never dry-sweep, which resuspends settled toxic particulates.',
+        'Wipe furniture and surfaces with damp microfiber cloths.',
+        'Launder curtains and bed linens weekly in hot water during smog season.',
+        'Place damp, high-density doormats at entrance thresholds to trap footwear pollutants.',
+      ],
+      applicableTo: ['apartment', 'independent-house'],
+      priority: 'medium',
+    },
+  ];
+}
 
-  const commuteMap: Record<string, SustainableAlternative> = {
+function generateIaqHacks(ctx: UserContext): IaqHack[] {
+  const isSevere = ctx.aqiTier === 'severe' || ctx.aqiTier === 'very-poor';
+  return [
+    getHousingIaqHack(ctx.housingType),
+    getPurifierIaqHack(isSevere),
+    getCookingIaqHack(ctx.cookingFuel),
+    ...getPlantAndDustIaqHacks(),
+  ];
+}
+
+function getCommuteAlternative(mode: CommuteMode): SustainableAlternative {
+  const commuteMap: Record<CommuteMode, SustainableAlternative> = {
     'two-wheeler': {
       category: 'Commute',
       current: 'Daily two-wheeler commute',
@@ -276,10 +291,11 @@ function generateAlternatives(ctx: UserContext): SustainableAlternative[] {
       icon: '📦',
     },
   };
-  const commuteAlt = commuteMap[ctx.commuteMode];
-  if (commuteAlt) alts.push(commuteAlt);
+  return commuteMap[mode];
+}
 
-  const fuelMap: Record<string, SustainableAlternative> = {
+function getFuelAlternative(fuel: CookingFuel): SustainableAlternative {
+  const fuelMap: Record<CookingFuel, SustainableAlternative> = {
     'solid-fuel': {
       category: 'Cooking Fuel',
       current: 'Wood / coal / biomass combustion',
@@ -302,32 +318,39 @@ function generateAlternatives(ctx: UserContext): SustainableAlternative[] {
       icon: '🌱',
     },
   };
-  const fuelAlt = fuelMap[ctx.cookingFuel];
-  if (fuelAlt) alts.push(fuelAlt);
+  return fuelMap[fuel];
+}
 
-  alts.push({
-    category: 'Winter Heating',
-    current: 'Kerosene heater / resistive blower / open fire',
-    alternative: 'Oil-filled radiator (zero combustion) + heavy insulated thermal curtains',
-    benefit: 'Oil radiators release zero indoor emissions; thermal curtains retain heat by 30%',
-    icon: '🌡️',
-  });
+function generateAlternatives(ctx: UserContext): SustainableAlternative[] {
+  const alts: SustainableAlternative[] = [
+    getCommuteAlternative(ctx.commuteMode),
+    getFuelAlternative(ctx.cookingFuel),
+    {
+      category: 'Winter Heating',
+      current: 'Kerosene heater / resistive blower / open fire',
+      alternative: 'Oil-filled radiator (zero combustion) + heavy insulated thermal curtains',
+      benefit: 'Oil radiators release zero indoor emissions; thermal curtains retain heat by 30%',
+      icon: '🌡️',
+    },
+  ];
 
   if (ctx.householdProfile === 'community-coordinator') {
-    alts.push({
-      category: 'Community Action',
-      current: 'Isolated household efforts',
-      alternative: 'Organize bulk HEPA purchase, shared community AQI nodes, and RWA green belts',
-      benefit: 'Bulk purchases lower purifier costs by 20–30%; shared sensors detect local emission peaks',
-      icon: '🌳',
-    });
-    alts.push({
-      category: 'Waste Management',
-      current: 'Open leaves & trash burning in locality',
-      alternative: 'Enforce leaf composting pits and report illegal open burning via local municipal apps',
-      benefit: 'Halts a primary source of ground-level toxic dioxins and heavy PM2.5 smoke',
-      icon: '♻️',
-    });
+    alts.push(
+      {
+        category: 'Community Action',
+        current: 'Isolated household efforts',
+        alternative: 'Organize bulk HEPA purchase, shared community AQI nodes, and RWA green belts',
+        benefit: 'Bulk purchases lower purifier costs by 20–30%; shared sensors detect local emission peaks',
+        icon: '🌳',
+      },
+      {
+        category: 'Waste Management',
+        current: 'Open leaves & trash burning in locality',
+        alternative: 'Enforce leaf composting pits and report illegal open burning via local municipal apps',
+        benefit: 'Halts a primary source of ground-level toxic dioxins and heavy PM2.5 smoke',
+        icon: '♻️',
+      },
+    );
   } else {
     alts.push({
       category: 'Household Routine',
@@ -341,6 +364,50 @@ function generateAlternatives(ctx: UserContext): SustainableAlternative[] {
   return alts;
 }
 
+function calculateCommuteImpact(mode: CommuteMode): { kg: number; desc: string } {
+  if (mode === 'work-from-home') {
+    return {
+      kg: 15.0,
+      desc: '14 kg/week (existing WFH baseline) + 1 kg (delivery batching)',
+    };
+  }
+  if (mode === 'public-transit') {
+    return {
+      kg: 10.0,
+      desc: '8.5 kg/week (existing transit baseline vs solo car) + 1.5 kg (route optimization)',
+    };
+  }
+  if (mode === 'two-wheeler') {
+    return {
+      kg: 3.5,
+      desc: '3.5 kg/week (shifting high-smog days to shared transit)',
+    };
+  }
+  return {
+    kg: 11.5,
+    desc: '11.5 kg/week (carpooling or shifting solo driving to mass transit)',
+  };
+}
+
+function calculateFuelImpact(fuel: CookingFuel): { kg: number; desc: string } {
+  if (fuel === 'electric') {
+    return {
+      kg: 3.5,
+      desc: '3.5 kg/week (existing zero-combustion electric cooking)',
+    };
+  }
+  if (fuel === 'lpg') {
+    return {
+      kg: 3.0,
+      desc: '2 kg/week (clean LPG baseline vs biomass) + 1 kg (transitioning to induction)',
+    };
+  }
+  return {
+    kg: 6.0,
+    desc: '6 kg/week (transitioning from solid biomass to clean induction/LPG)',
+  };
+}
+
 function calculateImpactMetrics(ctx: UserContext): ImpactMetrics {
   const pm25Base: Record<string, number> = {
     moderate: 15, poor: 25, 'very-poor': 35, severe: 45,
@@ -352,49 +419,18 @@ function calculateImpactMetrics(ctx: UserContext): ImpactMetrics {
   if (ctx.cookingFuel === 'electric') pm25 += 2;
   pm25 = Math.min(pm25, 65);
 
-  // Commute calculations (crediting existing baselines)
-  let commuteAvoidedKg = 0;
-  let commuteDesc = '';
+  const commute = calculateCommuteImpact(ctx.commuteMode);
+  const fuel = calculateFuelImpact(ctx.cookingFuel);
+  const totalCo2e = Math.round((commute.kg + fuel.kg) * 10) / 10;
 
-  if (ctx.commuteMode === 'work-from-home') {
-    commuteAvoidedKg = 15.0; // 14 kg existing baseline + 1 kg delivery batching
-    commuteDesc = '14 kg/week (existing WFH baseline) + 1 kg (delivery batching)';
-  } else if (ctx.commuteMode === 'public-transit') {
-    commuteAvoidedKg = 10.0; // 8.5 kg existing baseline vs solo car + 1.5 kg route timing
-    commuteDesc = '8.5 kg/week (existing transit baseline vs solo car) + 1.5 kg (route optimization)';
-  } else if (ctx.commuteMode === 'two-wheeler') {
-    commuteAvoidedKg = 3.5;
-    commuteDesc = '3.5 kg/week (shifting high-smog days to shared transit)';
-  } else {
-    commuteAvoidedKg = 11.5;
-    commuteDesc = '11.5 kg/week (carpooling or shifting solo driving to mass transit)';
-  }
-
-  // Cooking fuel calculations
-  let fuelAvoidedKg = 0;
-  let fuelDesc = '';
-
-  if (ctx.cookingFuel === 'electric') {
-    fuelAvoidedKg = 3.5;
-    fuelDesc = '3.5 kg/week (existing zero-combustion electric cooking)';
-  } else if (ctx.cookingFuel === 'lpg') {
-    fuelAvoidedKg = 3.0; // 2 kg baseline vs biomass + 1 kg induction swap
-    fuelDesc = '2 kg/week (clean LPG baseline vs biomass) + 1 kg (transitioning to induction)';
-  } else {
-    fuelAvoidedKg = 6.0;
-    fuelDesc = '6 kg/week (transitioning from solid biomass to clean induction/LPG)';
-  }
-
-  const totalCo2e = Math.round((commuteAvoidedKg + fuelAvoidedKg) * 10) / 10;
-
-  const healthMap: Record<string, string> = {
+  const healthMap: Record<HouseholdProfile, string> = {
     'family-young-children': '30–40% reduction in childhood respiratory infections; guards developing lung alveoli from toxic particulate.',
     'elderly-respiratory': 'Significant reduction in COPD/asthma exacerbations; lower risk of pollution-triggered cardiovascular distress.',
     'daily-commuters': 'Sharp reduction in transit-phase particulate intake; prevents cumulative vascular inflammation from road exhaust.',
     'community-coordinator': 'Protects 50+ families from localized hotspots; collective awareness lowers neighborhood pediatric sick days.',
   };
 
-  const communityMap: Record<string, string> = {
+  const communityMap: Record<HouseholdProfile, string> = {
     'family-young-children': 'Healthier neighborhood play environments; reduced school absences due to winter respiratory illness.',
     'elderly-respiratory': 'Community peer-check network ensures rapid assistance during severe winter smog episodes.',
     'daily-commuters': 'Mass transit and carpooling lower street-level traffic congestion and collective fleet exhaust.',
@@ -404,7 +440,7 @@ function calculateImpactMetrics(ctx: UserContext): ImpactMetrics {
   const explanation = `PM2.5 reduction: ~${pm25}% (Base ${pm25Base[ctx.aqiTier] ?? 20}% for ${ctx.aqiTier} AQI`
     + ` + ${ctx.housingType === 'apartment' ? '5% apartment seal advantage' : '0%'} `
     + `+ ${ctx.cookingFuel === 'solid-fuel' ? '8% solid-fuel cleanup' : ctx.cookingFuel === 'electric' ? '2% electric advantage' : '0%'}). `
-    + `Avoided CO₂e: ~${totalCo2e} kg/week [Commute: ${commuteDesc} | Fuel: ${fuelDesc}].`;
+    + `Avoided CO₂e: ~${totalCo2e} kg/week [Commute: ${commute.desc} | Fuel: ${fuel.desc}].`;
 
   return {
     pm25ReductionPercent: pm25,

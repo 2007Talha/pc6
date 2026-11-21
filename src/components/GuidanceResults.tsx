@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { GenerationState, GuidanceResult } from '../types/index.ts';
 import { DailyRoutineSection } from './DailyRoutineSection.tsx';
 import { IaqHacksSection } from './IaqHacksSection.tsx';
@@ -60,20 +60,30 @@ function formatResultsAsMarkdown(r: GuidanceResult): string {
 }
 
 export function GuidanceResults({ state, onRetry }: GuidanceResultsProps) {
+  const [isCopied, setIsCopied] = useState(false);
+
   const handleCopyAll = useCallback(async () => {
     if (!state.result) return;
     const text = formatResultsAsText(state.result);
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        if (typeof document.execCommand === 'function') {
+          document.execCommand('copy');
+        }
+        document.body.removeChild(textarea);
+      }
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+      // Silently catch clipboard restrictions
     }
   }, [state.result]);
 
@@ -92,7 +102,7 @@ export function GuidanceResults({ state, onRetry }: GuidanceResultsProps) {
   if (state.status === 'idle') {
     return (
       <section className="empty-state" aria-label="Awaiting input">
-        <p>🌬️ Fill in your context above and generate personalized air quality guidance.</p>
+        <p>🌬️ Fill in your context above or pick a 1-click test scenario to generate personalized air quality guidance.</p>
       </section>
     );
   }
@@ -143,7 +153,7 @@ export function GuidanceResults({ state, onRetry }: GuidanceResultsProps) {
               onClick={handleCopyAll}
               aria-label="Copy all guidance to clipboard"
             >
-              📋 Copy
+              {isCopied ? '✓ Copied!' : '📋 Copy'}
             </button>
             <button
               type="button"
